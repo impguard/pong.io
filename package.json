@@ -1,0 +1,10 @@
+{
+  "name": "pong.io",
+  "version": "1.0.0",
+  "description": "A simple pong game",
+  "main": "src/server/server.js",
+  "repository": "git@github.com:impguard/pong.io.git",
+  "author": "contact@kevinwu.io",
+  "license": "MIT",
+  "private": true
+}
