@@ -8,6 +8,8 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "build:client:prod": "webpack --mode production --config src/client/webpack.config.js",
+    "build:server:prod": "tsc --build src/server/tsconfig.json",
     "build:client": "webpack --mode development --config src/client/webpack.config.js",
     "build:server": "tsc --build src/server/tsconfig.json",
     "run:server": "node dist/server/server.js",

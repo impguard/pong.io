@@ -7,6 +7,17 @@ function build {
 }
 
 
+bake_task build:prod "Builds the production game."
+function build:prod {
+  docker build -f 'build/Dockerfile.prod' -t 'pong:latest' .
+  bake_echo_green "Built the server container!"
+  docker run --rm \
+    -v "$PWD/dist/client:/game/dist/client" \
+    'pong:latest' yarn build:client:prod
+  bake_echo_green "Built client files!"
+}
+
+
 bake_task compose "Runs docker compose."
 function compose {
   docker-compose -f 'build/docker-compose.yml' "$@"
@@ -25,7 +36,13 @@ function yarn {
 }
 
 
-bake_task run "Runs the game server."
+bake_task run "Runs the game."
 function run {
   compose up
+}
+
+
+bake_task run:prod "Runs the production game."
+function run:prod {
+  docker-compose -f 'build/docker-compose.prod.yml' up
 }
