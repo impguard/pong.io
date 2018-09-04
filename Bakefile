@@ -1,0 +1,25 @@
+#!/bin/bash
+
+
+bake_task build "Builds the game."
+function build {
+  docker build -f 'build/Dockerfile' -t 'pong:latest' .
+}
+
+
+bake_task compose "Runs docker compose."
+function compose {
+  docker-compose -f 'build/docker-compose.yml' "$@"
+}
+
+
+bake_task exec "Execs into the game server."
+function exec {
+  compose run server "$@"
+}
+
+
+bake_task yarn "Runs yarn in the container."
+function yarn {
+  compose run server yarn "$@"
+}

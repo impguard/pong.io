@@ -1,0 +1,13 @@
+version: '3.5'
+services:
+  server:
+    container_name: "pong"
+    image: "pong:latest"
+    volumes:
+      - "${PWD}/src:/game/src"
+      - "${PWD}/yarn.lock:/game/yarn.lock"
+      - "${PWD}/package.json:/game/package.json"
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "7777:80"
