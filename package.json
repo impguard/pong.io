@@ -7,7 +7,21 @@
   "author": "contact@kevinwu.io",
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "build:server": "tsc --build src/server/tsconfig.json",
+    "run:server": "node dist/server/server.js",
+    "run:live": "nodemon -e 'ts' --watch 'src/server' --exec ./node_modules/.bin/ts-node --project src/server/tsconfig.json src/server/server.ts"
+  },
   "dependencies": {
+    "@types/koa": "^2.0.46",
+    "@types/koa-router": "^7.0.31",
+    "@types/node": "^10.9.4",
+    "@types/socket.io": "^1.4.38",
+    "koa": "^2.5.2",
+    "koa-router": "^7.4.0",
+    "nodemon": "^1.18.4",
+    "socket.io": "^2.1.1",
+    "ts-node": "^7.0.1",
     "typescript": "^3.0.3",
     "yarn": "^1.9.4"
   }

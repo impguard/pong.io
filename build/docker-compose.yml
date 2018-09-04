@@ -4,9 +4,7 @@ services:
     container_name: "pong"
     image: "pong:latest"
     volumes:
-      - "${PWD}/src:/game/src"
-      - "${PWD}/yarn.lock:/game/yarn.lock"
-      - "${PWD}/package.json:/game/package.json"
+      - "${PWD}:/game"
     environment:
       - NODE_ENV=development
     ports:

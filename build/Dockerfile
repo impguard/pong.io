@@ -23,3 +23,6 @@ COPY yarn.lock ./yarn.lock
 COPY package.json ./package.json
 
 RUN yarn
+RUN yarn run build:server
+
+CMD ["yarn", "run", "run:server"]
