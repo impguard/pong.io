@@ -27,11 +27,5 @@ function yarn {
 
 bake_task run "Runs the game server."
 function run {
-  compose run --service-ports server yarn run:live
-}
-
-
-bake_task run:prod "Runs the production game server."
-function run:prod {
   compose up
 }

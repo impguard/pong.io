@@ -8,21 +8,31 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "build:client": "webpack --mode development --config src/client/webpack.config.js",
     "build:server": "tsc --build src/server/tsconfig.json",
     "run:server": "node dist/server/server.js",
-    "run:live": "nodemon -e 'ts' --watch 'src/server' --exec ./node_modules/.bin/ts-node --project src/server/tsconfig.json src/server/server.ts"
+    "run:client": "http-server src/client",
+    "live:client": "nodemon -e 'ts,html' --watch 'src/client' --exec npx http-server src/client",
+    "live:server": "nodemon -e 'ts' --watch 'src/server' --exec npx ts-node --project src/server/tsconfig.json src/server/server.ts"
   },
   "dependencies": {
+    "koa": "^2.5.2",
+    "koa-router": "^7.4.0",
+    "socket.io": "^2.1.1"
+  },
+  "devDependencies": {
     "@types/koa": "^2.0.46",
     "@types/koa-router": "^7.0.31",
     "@types/node": "^10.9.4",
     "@types/socket.io": "^1.4.38",
-    "koa": "^2.5.2",
-    "koa-router": "^7.4.0",
+    "copy-webpack-plugin": "^4.5.2",
+    "http-server": "^0.11.1",
     "nodemon": "^1.18.4",
-    "socket.io": "^2.1.1",
+    "ts-loader": "^5.0.0",
     "ts-node": "^7.0.1",
     "typescript": "^3.0.3",
+    "webpack": "^4.17.2",
+    "webpack-command": "^0.4.1",
     "yarn": "^1.9.4"
   }
 }
