@@ -26,4 +26,11 @@ app.use(router.routes())
 const server = http.createServer(app.callback())
 const io = socket(server)
 
-server.listen(80)
+// Useful socket.io emit documentation
+// https://socket.io/docs/emit-cheatsheet/
+
+server.listen(80, () => {
+    setInterval(() => {
+      io.emit('time', `Time ${Date.now()}`)
+    }, 1000)
+})

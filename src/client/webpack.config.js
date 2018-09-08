@@ -13,7 +13,7 @@ module.exports = {
       path.resolve('./node_modules')
     ],
     // Pick up typescript files
-    extensions: ['.ts', '.tsx']
+    extensions: ['.js', '.ts', '.tsx']
   },
 
   output: {

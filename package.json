@@ -13,8 +13,8 @@
     "build:client": "webpack --mode development --config src/client/webpack.config.js",
     "build:server": "tsc --build src/server/tsconfig.json",
     "run:server": "node dist/server/server.js",
-    "run:client": "http-server src/client",
-    "live:client": "nodemon -e 'ts,html' --watch 'src/client' --exec npx http-server src/client",
+    "run:client": "http-server dist/client",
+    "live:client": "webpack-serve src/client/webpack.config.js",
     "live:server": "nodemon -e 'ts' --watch 'src/server' --exec npx ts-node --project src/server/tsconfig.json src/server/server.ts"
   },
   "dependencies": {
@@ -27,6 +27,7 @@
     "@types/koa-router": "^7.0.31",
     "@types/node": "^10.9.4",
     "@types/socket.io": "^1.4.38",
+    "@types/socket.io-client": "^1.4.32",
     "copy-webpack-plugin": "^4.5.2",
     "http-server": "^0.11.1",
     "nodemon": "^1.18.4",
@@ -35,6 +36,7 @@
     "typescript": "^3.0.3",
     "webpack": "^4.17.2",
     "webpack-command": "^0.4.1",
+    "webpack-serve": "^2.0.2",
     "yarn": "^1.9.4"
   }
 }
