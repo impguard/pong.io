@@ -5,7 +5,16 @@
   <title>Paddle Royale</title>
 </head>
 <body>
-  <div>Hello World!</div>
+  <form onclick="return false">
+    host: <input id='host' type="text" name="host">
+    <br><br>
+    port: <input id='port' type="text" name="port">
+    <br><br>
+    <input id='submit' type="submit" value="Connect">
+  </form>
+  <br>
+  <div>output:</div>
+  <textarea id='output' rows="4" cols="50"></textarea>
   <div id="game"></div>
   <script src="client.js"></script>
 </body>
