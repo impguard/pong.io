@@ -56,6 +56,8 @@ function run:live {
     id=$(docker create --rm --name 'pong-cache' 'pong:latest' true)
     docker cp "$id:/game/node_modules" ./node_modules
     docker rm "$id" 1>/dev/null
+
+    bake_echo_green "Cache completed. Run 'bake yarn' to update."
   fi
 
   docker-compose -f 'build/docker-compose.live.yml' up
