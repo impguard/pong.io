@@ -109,6 +109,7 @@ function push {
   version=${1:-$(version.next)}
   env=${2:-dev}
 
+  bake_echo_yellow "Building $version"
   build "$env"
 
   bake_echo_yellow "Pushing client files to s3"
