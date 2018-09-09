@@ -13,7 +13,7 @@ module.exports = {
       path.resolve('./node_modules')
     ],
     // Pick up typescript files
-    extensions: ['.js', '.ts', '.tsx']
+    extensions: ['.js', '.ts']
   },
 
   output: {
@@ -25,7 +25,10 @@ module.exports = {
   module: {
     rules: [
       // Handle typescript files with typescript loader
-      { test: /\.tsx?$/, loader: "ts-loader" }
+      {
+        test: /\.ts$/,
+        loader: "ts-loader",
+      }
     ],
   },
 
