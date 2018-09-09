@@ -22,6 +22,10 @@ COPY src ./src
 COPY yarn.lock ./yarn.lock
 COPY package.json ./package.json
 
+ARG NODE_ENV
+ENV NODE_ENV=${NODE_ENV}
+
 RUN yarn
-RUN yarn run build:client
 RUN yarn run build:server
+
+CMD ["yarn", "run:server"]

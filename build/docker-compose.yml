@@ -2,21 +2,14 @@ version: '3.5'
 services:
   server:
     container_name: "pong-server"
-    command: yarn live:server
     image: "pong:latest"
-    volumes:
-      - "${PWD}:/game"
-    environment:
-      - NODE_ENV=development
     ports:
       - "7777:80"
   client:
     container_name: "pong-client"
-    command: yarn live:client
+    command: yarn run:client
     image: "pong:latest"
     volumes:
-      - "${PWD}:/game"
-    environment:
-      - NODE_ENV=development
+      - "${PWD}/dist/client:/game/dist/client"
     ports:
       - "7778:8080"

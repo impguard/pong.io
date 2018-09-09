@@ -6,6 +6,9 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 module.exports = {
   entry: './src/client/client.ts',
 
+  mode: process.env.NODE_ENV,
+  devtool: process.env.NODE_ENV == 'development' ? 'eval-source-map': '',
+
   resolve: {
     // Allow absolute path resolution
     modules: [

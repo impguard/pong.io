@@ -1,22 +1,26 @@
 #!/bin/bash
 
-
-bake_task build "Builds the game."
+bake_task build "Builds the game in development mode."
 function build {
-  docker build -f 'build/Dockerfile' -t 'pong:latest' .
-}
+  local env=${1:-development}
 
+  docker build \
+    --build-arg NODE_ENV="$env" \
+    -f 'build/Dockerfile' \
+    -t 'pong:latest' .
+  bake_echo_green 'Built the server container!'
 
-bake_task build:prod "Builds the production game."
-function build:prod {
-  docker build -f 'build/Dockerfile.prod' -t 'pong:latest' .
-  bake_echo_green "Built the server container!"
   docker run --rm \
     -v "$PWD/dist/client:/game/dist/client" \
-    'pong:latest' yarn build:client:prod
+    'pong:latest' yarn build:client
   bake_echo_green "Built client files!"
 }
 
+
+bake_task build:prod "Builds the game in production mode."
+function build:prod {
+  build production
+}
 
 bake_task compose "Runs docker compose."
 function compose {
@@ -42,7 +46,17 @@ function run {
 }
 
 
-bake_task run:prod "Runs the production game."
-function run:prod {
-  docker-compose -f 'build/docker-compose.prod.yml' up
+bake_task run:live "Runs the game with live reloading."
+function run:live {
+  local id
+
+  if [ ! -d node_modules ]; then
+    bake_echo_yellow 'Caching node modules...'
+
+    id=$(docker create --rm --name 'pong-cache' 'pong:latest' true)
+    docker cp "$id:/game/node_modules" ./node_modules
+    docker rm "$id" 1>/dev/null
+  fi
+
+  docker-compose -f 'build/docker-compose.live.yml' up
 }
