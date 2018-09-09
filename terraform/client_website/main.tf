@@ -13,7 +13,7 @@ resource "aws_s3_bucket" "client_site" {
       error_document = "404.html"
     }
     tags {
-      name = "${var.s3["project_id"]} ${var.s3["environment"]} client site"
+      name = "${var.s3["bucket_name"]} client site"
     }
     force_destroy = true
 }

@@ -2,21 +2,15 @@
 # Client Builds Storage
 # --------------------------------------------------
 
-module "pong_client_builds_dev" {
-  source = "./client_builds"
+resource "aws_s3_bucket" "pong_client_builds" {
+  bucket = "pong-client-builds"
 
-  s3 = {
-    project_id = "${var.project_id}"
-    build_type = "dev"
+  versioning {
+    enabled = true
   }
-}
 
-module "pong_client_builds_prod" {
-  source = "./client_builds"
-
-  s3 = {
-    project_id = "${var.project_id}"
-    build_type = "prod"
+  lifecycle {
+    prevent_destroy = true
   }
 }
 
@@ -28,26 +22,20 @@ module "pong_client_site_dev" {
   source = "./client_website"
 
   s3 = {
-    project_id = "${var.project_id}"
-    bucket_name = "dev.paddleroyale.io"
-    environment = "dev"
+    bucket_name = "${var.project_id}-dev-site"
   }
 }
 module "pong_client_site_test" {
   source = "./client_website"
 
   s3 = {
-    project_id = "${var.project_id}"
-    bucket_name = "test.paddleroyale.io"
-    environment = "test"
+    bucket_name = "${var.project_id}-test-site"
   }
 }
 module "pong_client_site_prod" {
   source = "./client_website"
 
   s3 = {
-    project_id = "${var.project_id}"
-    bucket_name = "paddleroyale.io"
-    environment = "prod"
+    bucket_name = "${var.project_id}-prod-site"
   }
 }
