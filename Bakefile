@@ -1,11 +1,47 @@
 #!/bin/bash
 
+function version.latest {
+  local prev_version
+
+  prev_version=$(git tag | grep -E "v_\\.*" | sort -t. -n -k1,1 -k2,2 -k3,3 -k4,4 | tail -1 | cut -d _ -f 2)
+
+  echo "$prev_version"
+}
+
+
+function version.next {
+  local prev_versions prev_version prev_major_version prev_minor_version minor_version
+
+  prev_versions=$(git tag | grep -E "v_\\.*" | sort -t. -n -k1,1 -k2,2 -k3,3 -k4,4 | cut -d _ -f 2)
+
+  if [ -z "$prev_versions" ]; then
+    prev_version=0.0.0
+  else
+    prev_version=$(echo "$prev_versions" | tail -n 1)
+  fi
+
+  prev_major_version=$(echo "$prev_version" | cut -d . -f 1)
+  prev_minor_version=$(echo "$prev_version" | cut -d . -f 2)
+
+  minor_version=$((prev_minor_version + 1))
+
+  echo "$prev_major_version.$minor_version.0"
+}
+
+
 bake_task build "Builds the game in development mode."
 function build {
-  local env=${1:-development}
+  local env node_env
+
+  env=${1:-dev}
+  if [ "$env" == "dev" ]; then
+    node_env='development'
+  else
+    node_env='production'
+  fi
 
   docker build \
-    --build-arg NODE_ENV="$env" \
+    --build-arg NODE_ENV="$node_env" \
     -f 'build/Dockerfile' \
     -t 'pong:latest' .
   bake_echo_green 'Built the server container!'
@@ -19,7 +55,7 @@ function build {
 
 bake_task build:prod "Builds the game in production mode."
 function build:prod {
-  build production
+  build prod
 }
 
 bake_task compose "Runs docker compose."
@@ -61,4 +97,34 @@ function run:live {
   fi
 
   docker-compose -f 'build/docker-compose.live.yml' up
+}
+
+
+bake_task push "Pushes the development build."
+function push {
+  local env version
+
+  git fetch --tags
+
+  env=${1:-dev}
+  version=$(version.next)
+
+  git tag -a "v_$version"
+  git push --tags
+
+  build "$env"
+
+  bake_echo_yellow "Pushing client files to s3"
+  aws s3 sync "./dist/client/" "s3://pong-client-builds/$env/$version" --delete
+
+  bake_echo_yellow "Pushing server image to ecr"
+  local image_id="344778228378.dkr.ecr.us-west-2.amazonaws.com/pong:$env-$version"
+  docker tag pong:latest "$image_id"
+  docker push "$image_id"
+}
+
+
+bake_task push:prod "Pushes the production build."
+function push:prod {
+  push prod
 }
