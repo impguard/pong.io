@@ -106,10 +106,10 @@ function push {
 
   git fetch --tags
 
-  env=${1:-dev}
-  version=$(version.next)
+  version=${1:-$(version.next)}
+  env=${2:-dev}
 
-  git tag -a "v_$version"
+  git tag -a "v_$version" -m "$version"
   git push --tags
 
   build "$env"
@@ -126,5 +126,8 @@ function push {
 
 bake_task push:prod "Pushes the production build."
 function push:prod {
-  push prod
+  local version
+  version=${1:-$(version.next)}
+
+  push "$version" prod
 }
