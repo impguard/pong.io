@@ -26,7 +26,7 @@ resource "aws_ecr_lifecycle_policy" "expiration" {
     },
     {
       "rulePriority": 2,
-      "description": "Expire oldest tagged images",
+      "description": "Expire oldest images",
       "selection": {
         "tagStatus": "any",
         "countType": "imageCountMoreThan",
