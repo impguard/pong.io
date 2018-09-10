@@ -63,7 +63,7 @@ resource "aws_iam_role" "task" {
     {
       "Action": "sts:AssumeRole",
       "Principal": {
-        "Service": "ec2.amazonaws.com"
+        "Service": "ecs.amazonaws.com"
       },
       "Effect": "Allow",
       "Sid": ""
