@@ -25,6 +25,7 @@ module "pong_client_site_dev" {
     bucket_name = "${var.project_id}-dev-site"
   }
 }
+
 module "pong_client_site_test" {
   source = "./client_website"
 
@@ -32,6 +33,7 @@ module "pong_client_site_test" {
     bucket_name = "${var.project_id}-test-site"
   }
 }
+
 module "pong_client_site_prod" {
   source = "./client_website"
 
