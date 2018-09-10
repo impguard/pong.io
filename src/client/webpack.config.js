@@ -38,7 +38,7 @@ module.exports = {
   plugins: [
     // Copy some static files as well in the build
     new CopyWebpackPlugin([
-      { from: './src/client/index.html', to: path.resolve('./dist/client/') },
+      { from: './src/client/*.html', to: path.resolve('./dist/client/'), flatten:true },
     ]),
   ],
 };

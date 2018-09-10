@@ -72,7 +72,7 @@ function exec {
 
 bake_task yarn "Runs yarn in the container."
 function yarn {
-  compose run server yarn "$@"
+  docker-compose -f 'build/docker-compose.live.yml' run server yarn "$@"
 }
 
 
@@ -131,4 +131,37 @@ function push:prod {
   git push --tags
 
   push "$version" prod
+}
+
+
+bake_task deploy "Deploys a build to an environment."
+function deploy {
+  local build_env version env
+
+  if [ "$#" -lt 1 ]; then
+    bake_echo_red "usage: bake deploy ENV [BUILD_ENV] [VERSION]"
+    exit 1
+  fi
+
+  env=$1
+  build_env=${2:-dev}
+
+  if [ "$build_env" == 'dev' ]; then
+    version=${3:-$(version.next)}
+  else
+    version=${3:-$(version.latest)}
+  fi
+
+  local builds_bucket deploy_bucket
+
+  builds_bucket="s3://pong-client-builds/$build_env/$version"
+  deploy_bucket="s3://pong-$env-site"
+
+  if ! aws s3 ls "$builds_bucket" >/dev/null; then
+    bake_echo_red "$builds_bucket does not exist"
+    exit 1
+  fi
+
+  bake_echo_yellow "Deploying $build_env-$version build to client $env"
+  aws s3 sync "$builds_bucket" "$deploy_bucket" --delete
 }
