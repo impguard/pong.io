@@ -152,16 +152,72 @@ function deploy {
     version=${3:-$(version.latest)}
   fi
 
-  local builds_bucket deploy_bucket
+  local builds_bucket deploy_bucket image_id
 
   builds_bucket="s3://pong-client-builds/$build_env/$version"
   deploy_bucket="s3://pong-$env-site"
+  image_id="344778228378.dkr.ecr.us-west-2.amazonaws.com/pong:$build_env-$version"
 
   if ! aws s3 ls "$builds_bucket" >/dev/null; then
-    bake_echo_red "$builds_bucket does not exist"
+    bake_echo_red "$builds_bucket does not exist in S3"
+    exit 1
+  fi
+
+  if ! aws ecr list-images --registry-id 344778228378 --repository-name pong | grep "$build_env-$version" >/dev/null; then
+    bake_echo_red "$image_id does not exist in ECR"
     exit 1
   fi
 
   bake_echo_yellow "Deploying $build_env-$version build to client $env"
   aws s3 sync "$builds_bucket" "$deploy_bucket" --delete
+
+  bake_echo_yellow "Deploying $build_env-$version build to server $env"
+
+  local taskdef task
+  taskdef=$(jq ". | .containerDefinitions[0].image = \"$image_id\" | ." deploy/task-definition.json)
+  task=$(aws ecs register-task-definition --family "pong-$env-server" --cli-input-json "$taskdef")
+
+  echo "$task" | jq -r '.taskDefinition.taskDefinitionArn'
+}
+
+
+bake_task server:start "Starts a game server."
+function server:start {
+  local taskdefarn taskrun
+
+  taskdefarn=$1
+  taskrun=$(jq ". | .taskDefinition = \"$taskdefarn\" | ." deploy/task-run.json)
+
+  aws ecs run-task --cli-input-json "$taskrun" \
+    | jq -r ".tasks[].taskArn"
+}
+
+
+bake_task server:stop "Stops a game server."
+function server:stop {
+  aws ecs stop-task --cluster "pong-sandbox" --task "$1" >/dev/null
+  bake_echo_green "Server stopped!"
+}
+
+
+bake_task server:ls "Lists all running game servers."
+function server:ls {
+  local arns
+  arns=$(aws ecs list-tasks --cluster "pong-sandbox" | jq -r '.taskArns | join(" ")')
+
+  # shellcheck disable=SC2086
+  aws ecs describe-tasks --cluster "pong-sandbox" --tasks $arns \
+    | jq '.tasks[] | { "arn": .taskArn, "status": .lastStatus }'
+}
+
+bake_task server:ip "Shows ip for running game server task."
+function server:ip {
+  local taskdefarn eni
+
+  taskdefarn=$1
+
+  description=$(aws ecs describe-tasks --cluster "pong-sandbox" --tasks "$taskdefarn")
+  eni=$(echo "$description" | jq -r '.tasks[].attachments[0].details[] | select(.name == "networkInterfaceId") | .value')
+  aws ec2 describe-network-interfaces --network-interface-ids "$eni" \
+    | jq -r '.NetworkInterfaces[].Association.PublicIp'
 }

@@ -1,0 +1,18 @@
+{
+    "cluster": "pong-sandbox",
+    "taskDefinition": "",
+    "count": 1,
+    "startedBy": "bake",
+    "launchType": "FARGATE",
+    "networkConfiguration": {
+        "awsvpcConfiguration": {
+            "subnets": [
+                "subnet-01fd1defa3486570d"
+            ],
+            "securityGroups": [
+                "sg-0f3f65e98474dc050"
+            ],
+            "assignPublicIp": "ENABLED"
+        }
+    }
+}
