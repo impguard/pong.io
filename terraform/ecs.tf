@@ -88,5 +88,5 @@ resource "aws_iam_role_policy_attachment" "task_execution" {
 # --------------------------------------------------
 
 resource "aws_cloudwatch_log_group" "sandbox" {
-  name = "sandbox"
+  name = "pong-sandbox"
 }
