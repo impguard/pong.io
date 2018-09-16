@@ -65,8 +65,7 @@ resource "aws_iam_role" "ecs-fleet" {
       "Effect": "Allow",
       "Principal": {
         "Service": [
-          "spotfleet.amazonaws.com",
-          "ec2.amazonaws.com"
+          "spotfleet.amazonaws.com"
         ]
       },
       "Action": "sts:AssumeRole"
@@ -74,6 +73,11 @@ resource "aws_iam_role" "ecs-fleet" {
   ]
 }
 EOF
+}
+
+resource "aws_iam_role_policy_attachment" "spot-fleet-tagging"  {
+  role = "${aws_iam_role.ecs-fleet.name}"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2SpotFleetTaggingRole"
 }
 
 resource "aws_iam_role" "ecs-instance" {
@@ -96,9 +100,9 @@ resource "aws_iam_role" "ecs-instance" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "task-execution" {
+resource "aws_iam_role_policy_attachment" "ecs-ec2" {
   role       = "${aws_iam_role.ecs-instance.name}"
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
 }
 
 resource "aws_iam_instance_profile" "ecs" {
@@ -137,7 +141,7 @@ resource "aws_spot_fleet_request" "sandbox" {
 
     ebs_block_device {
       device_name = "/dev/xvdcz"
-      volume_size = "10"
+      volume_size = "50"
       volume_type = "gp2"
     }
 
