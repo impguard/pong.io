@@ -1,5 +1,5 @@
 import * as io from 'socket.io-client'
-import * as game from './game'
+import * as app from './app'
 import * as scene from './scene'
 
 const state = {
@@ -18,7 +18,7 @@ play.addEventListener('click', () => {
 
   state.socket = io(`${host}:${port}`)
 
-  game.setup(state.socket)
+  app.run(app.setup(state.socket))
 
   scene.change(scene.Name.Game)
 })

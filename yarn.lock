@@ -80,6 +80,10 @@
     "@types/koa-compose" "*"
     "@types/node" "*"
 
+"@types/matter-js@^0.10.1":
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/@types/matter-js/-/matter-js-0.10.1.tgz#f7d82f3a28d6e59aae63f8ae285303606193a0c1"
+
 "@types/mime@*":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@types/mime/-/mime-2.0.0.tgz#5a7306e367c539b9f6543499de8dd519fac37a8b"
