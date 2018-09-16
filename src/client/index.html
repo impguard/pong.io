@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <title>Paddle Royale</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+  <link rel="shortcut icon" type="image/jpg" href="https://i.pinimg.com/236x/52/f2/08/52f20806b5ffb4542a46c74b1719bf16--owl-logo-owl-pics.jpg"/>
 </head>
 <body>
-  <form onclick="return false">
-    host: <input id='host' type="text" name="host">
-    <br><br>
-    port: <input id='port' type="text" name="port">
-    <br><br>
-    <input id='submit' type="submit" value="Connect">
-  </form>
-  <br>
-  <div>output:</div>
-  <textarea id='output' rows="4" cols="50"></textarea>
+  <div id="home">
+    <button id='play' type="button">Play</button>
+    <input id="host" type="text" placeholder="Host">
+    <input id="port" type="text" placeholder="Port">
+  </div>
+
   <div id="game"></div>
+
   <script src="client.js"></script>
 </body>
 </html>

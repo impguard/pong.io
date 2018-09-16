@@ -5,6 +5,6 @@
     "sourceMap": true
   },
   "files": [
-    "./client.ts"
+    "./ts/client.ts"
   ]
 }

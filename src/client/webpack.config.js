@@ -4,7 +4,7 @@ const webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = {
-  entry: './src/client/client.ts',
+  entry: './src/client/ts/client.ts',
 
   mode: process.env.NODE_ENV,
   devtool: process.env.NODE_ENV == 'development' ? 'eval-source-map': '',
@@ -39,6 +39,7 @@ module.exports = {
     // Copy some static files as well in the build
     new CopyWebpackPlugin([
       { from: './src/client/*.html', to: path.resolve('./dist/client/'), flatten:true },
+      { from: './src/client/css', to: path.resolve('./dist/client/css') },
     ]),
   ],
 };
