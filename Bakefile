@@ -66,7 +66,7 @@ function compose {
 
 bake_task exec "Execs into the game server."
 function exec {
-  compose run server "$@"
+  docker-compose -f 'build/docker-compose.live.yml' run server "$@"
 }
 
 
@@ -193,6 +193,12 @@ function server:start {
 }
 
 
+bake_task server:deploys "Lists the deploys that can be used to start a server"
+function server:deploys {
+  aws ecs list-task-definitions --family-prefix pong-dev-server | jq '.taskDefinitionArns'
+}
+
+
 bake_task server:stop "Stops a game server."
 function server:stop {
   aws ecs stop-task --cluster "pong-sandbox" --task "$1" >/dev/null
@@ -205,19 +211,36 @@ function server:ls {
   local arns
   arns=$(aws ecs list-tasks --cluster "pong-sandbox" | jq -r '.taskArns | join(" ")')
 
-  # shellcheck disable=SC2086
-  aws ecs describe-tasks --cluster "pong-sandbox" --tasks $arns \
-    | jq '.tasks[] | { "arn": .taskArn, "status": .lastStatus }'
+  for arn in $arns; do
+    server:info "$arn"
+  done
 }
 
-bake_task server:ip "Shows ip for running game server task."
-function server:ip {
-  local taskdefarn eni
 
-  taskdefarn=$1
+bake_task server:info "Shows the information for a game server task."
+function server:info {
+  local taskdefarn=$1
 
   description=$(aws ecs describe-tasks --cluster "pong-sandbox" --tasks "$taskdefarn")
-  eni=$(echo "$description" | jq -r '.tasks[].attachments[0].details[] | select(.name == "networkInterfaceId") | .value')
-  aws ec2 describe-network-interfaces --network-interface-ids "$eni" \
-    | jq -r '.NetworkInterfaces[].Association.PublicIp'
+
+  local arn port ip status container_instance_arn instance_id
+
+  arn=$(echo "$description" | jq -r '.tasks[0].taskArn')
+  status=$(echo "$description" | jq -r '.tasks[0].lastStatus')
+  port=$(echo "$description" | jq -r '.tasks[0].containers[0].networkBindings[0].hostPort')
+  container_instance_arn=$(echo "$description" | jq -r '.tasks[0].containerInstanceArn')
+  instance_id=$(aws ecs describe-container-instances \
+    --cluster "pong-sandbox" \
+    --container-instances \
+    "$container_instance_arn" | jq -r '.containerInstances[0].ec2InstanceId')
+
+  ip=$(aws ec2 describe-instances --instance-ids "$instance_id" \
+    | jq -r '.Reservations[0].Instances[0].NetworkInterfaces[0].PrivateIpAddresses[0].Association.PublicIp')
+
+  jq -n \
+    --arg arn "$arn" \
+    --arg status "$status" \
+    --arg ip "$ip" \
+    --arg port "$port" \
+    '{ arn: $arn, status: $status, ip: $ip, port: $port }'
 }
