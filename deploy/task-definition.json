@@ -1,30 +1,29 @@
 {
     "requiresCompatibilities": [
-        "FARGATE"
+        "EC2"
     ],
+    "taskRoleArn": "arn:aws:iam::344778228378:role/pong-task_role",
     "containerDefinitions": [
         {
             "name": "server",
-            "image": "",
+            "image": "344778228378.dkr.ecr.us-west-2.amazonaws.com/pong:dev-0.1.0",
             "essential": true,
-            "portMappings": [
-                {
-                    "containerPort": 80,
-                    "protocol": "tcp"
-                }
-            ],
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
                     "awslogs-group": "pong-sandbox",
-                    "awslogs-region": "us-west-2",
-                    "awslogs-stream-prefix": "server"
+                    "awslogs-region": "us-west-2"
                 }
-            }
+            },
+            "portMappings": [
+                {
+                    "protocol": "tcp",
+                    "containerPort": 80
+                }
+            ]
         }
     ],
-    "networkMode": "awsvpc",
-    "memory": "512",
     "cpu": "256",
-    "executionRoleArn": "arn:aws:iam::344778228378:role/pong-task_role"
+    "memory": "512",
+    "family": "pong-dev-server"
 }
