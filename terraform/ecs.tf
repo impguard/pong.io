@@ -100,9 +100,39 @@ resource "aws_iam_role" "ecs-instance" {
 EOF
 }
 
+resource "aws_iam_policy" "awslogs" {
+  name        = "pong-awslogs"
+  description = "Allows pong ECS Instances to send logs to Cloudwatch."
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:DescribeLogStreams"
+      ],
+      "Resource": [
+        "arn:aws:logs:*:*:*"
+      ]
+    }
+  ]
+}
+EOF
+}
+
 resource "aws_iam_role_policy_attachment" "ecs-ec2" {
   role       = "${aws_iam_role.ecs-instance.name}"
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+}
+
+resource "aws_iam_role_policy_attachment" "ecs-awslogs" {
+  role       = "${aws_iam_role.ecs-instance.name}"
+  policy_arn = "${aws_iam_policy.awslogs.arn}"
 }
 
 resource "aws_iam_instance_profile" "ecs" {
