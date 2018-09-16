@@ -7,6 +7,7 @@ const state = {
 }
 
 const play = document.getElementById('play')
+const reset = document.getElementById('reset')
 
 play.addEventListener('click', () => {
   const host = (<HTMLInputElement> document.getElementById('host')).value
@@ -21,4 +22,11 @@ play.addEventListener('click', () => {
   app.run(app.setup(state.socket))
 
   scene.change(scene.Name.Game)
+})
+
+reset.addEventListener('click', () => {
+  const host = (<HTMLInputElement> document.getElementById('host')).value
+  const port = (<HTMLInputElement> document.getElementById('port')).value
+
+  fetch(`http://${host}:${port}/reset`)
 })
