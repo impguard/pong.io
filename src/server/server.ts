@@ -1,29 +1,30 @@
 import * as http from 'http'
 import * as Koa from 'koa'
 import * as Router from 'koa-router'
-import * as socket from 'socket.io'
+import * as io from 'socket.io'
+
+import { config } from './config'
 
 /****************************************
- * Globals
+ * State
  ****************************************/
 
-const config = {
-  START_MATCH_TIME: 5000,
-  END_MATCH_TIME: 300000,
-  GAME_LOOP_SPEED: 1000,
-}
-
 const state = {
-  started: false,
-  startCountdown: null,
+  io: null,
 }
 
 /****************************************
- * Web Application
+ * Web Server and Application
  ****************************************/
 
 const app = new Koa()
 const router = new Router()
+
+const cors = {
+  'Access-Control-Allow-Origin': 'http://localhost:7778',
+  'Access-Control-Allow-Methods': 'GET',
+  'Access-Control-Allow-Headers': 'Content-Type',
+}
 
 router.get('/health', (ctx) => {
   ctx.body = {
@@ -32,39 +33,31 @@ router.get('/health', (ctx) => {
 })
 
 router.get('/reset', (ctx) => {
+  ctx.set(cors)
   ctx.body = {
     'state': 'RESET'
   }
-
-  startCountdown()
 })
 
 app.use(router.routes())
    .use(router.allowedMethods())
 
-/****************************************
- * Game Server
- ****************************************/
-
 const server = http.createServer(app.callback())
-const io = socket(server)
+state.io = io(server)
 
-const startCountdown = () => {
-  clearTimeout(state.startCountdown)
-  state.startCountdown = setTimeout(() => {
-    const hasPlayers = Object.keys(io.sockets.connected).length >= 0
-    if (hasPlayers) {
-      state.started = true
-      io.emit('start', 'Starting match...')
+state.io.on('connection', (client) => {
+  client.on('disconnect', (client) => {
+    var playersRemaining = state.io.sockets.connections != null
+      ? Object.keys(state.io.sockets.connections).length
+      : 0
+
+    if (playersRemaining == 0) {
+      console.log("No players remaining, resetting...")
     }
-  }, config.START_MATCH_TIME)
-}
+  })
 
-io.on('connection', (client) => {
-  if (state.started) {
-    setTimeout(() => client.disconnect(true), 500);
-    return
-  }
+  client.emit('accepted')
+  console.log("Accepted player...")
 })
 
 /****************************************
@@ -72,12 +65,6 @@ io.on('connection', (client) => {
  ****************************************/
 
 server.listen(80, () => {
-
- startCountdown()
-
-  // loop
   setInterval(() => {
-    io.emit('time', `Time ${Date.now()}`)
   }, config.GAME_LOOP_SPEED)
 })
-

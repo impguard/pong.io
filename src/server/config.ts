@@ -1,0 +1,5 @@
+export const config = {
+  START_MATCH_TIME: 5000,
+  END_MATCH_TIME: 300000,
+  GAME_LOOP_SPEED: 1000,
+}
