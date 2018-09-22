@@ -93,28 +93,6 @@ END
 }
 
 
-bake_task tag "Tags the current branch with the next version."
-function tag ()
-{
-  bake.configs.setup
-
-  git fetch --tags
-
-  local version
-  version=$(version.next)
-
-  if version.exists; then
-    bake_echo_green "$version already exists. Skipping tag."
-    return 0
-  fi
-
-  git tag -a "v_$version" -m "Version $version"
-  git push --tags
-
-  bake_echo_green "Successfully tagged $version"
-}
-
-
 bake_task build "Builds the game for a specific tier."
 function build {
   local tier node_env
@@ -184,6 +162,31 @@ function run:live {
   fi
 
   compose up
+}
+
+
+bake_task tag "Tags the current branch with the next version."
+function tag ()
+{
+  if [ -n "$(git status -s)" ]; then
+    bake_echo_red "You have uncommitted changes. Aborting the tag."
+    return 1
+  fi
+
+  git fetch --tags
+
+  local version
+  version=$(version.next)
+
+  if version.exists; then
+    bake_echo_green "$version already exists. Skipping tag."
+    return 0
+  fi
+
+  git tag -a "v_$version" -m "Version $version"
+  git push --tags
+
+  bake_echo_green "Successfully tagged $version"
 }
 
 
