@@ -1,16 +1,43 @@
 #!/bin/bash
 
-function version.latest {
+
+function __find_versions ()
+{
+  (grep -E "v_\\.*" | sort -t. -n -k1,1 -k2,2 -k3,3 -k4,4) || echo
+}
+
+
+function version.exists ()
+{
+  local existing_version
+  existing_version=$(git tag -l --contains HEAD | __find_versions | tail -1 | cut -d _ -f 2)
+  test -n "$existing_version"
+}
+
+
+function version.latest ()
+{
   local prev_version
 
-  prev_version=$(git tag | grep -E "v_\\.*" | sort -t. -n -k1,1 -k2,2 -k3,3 -k4,4 | tail -1 | cut -d _ -f 2)
+  prev_version=$(git tag | __find_versions | tail -1 | cut -d _ -f 2)
 
   echo "$prev_version"
 }
 
 
-function version.next {
-  local prev_versions prev_version prev_major_version prev_minor_version minor_version
+function version.next ()
+{
+  local existing_version
+
+  existing_version=$(git tag -l --contains HEAD | __find_versions | tail -1 | cut -d _ -f 2)
+
+  if [ -n "$existing_version" ]; then
+    echo "$existing_version"
+    return 0
+  fi
+
+  local prev_versions prev_version prev_major_minor_version prev_patch_version
+  local patch_version
 
   prev_versions=$(git tag | grep -E "v_\\.*" | sort -t. -n -k1,1 -k2,2 -k3,3 -k4,4 | cut -d _ -f 2)
 
@@ -20,21 +47,86 @@ function version.next {
     prev_version=$(echo "$prev_versions" | tail -n 1)
   fi
 
-  prev_major_version=$(echo "$prev_version" | cut -d . -f 1)
-  prev_minor_version=$(echo "$prev_version" | cut -d . -f 2)
+  prev_major_minor_version=$(echo "$prev_version" | cut -d . -f 1,2)
+  prev_patch_version=$(echo "$prev_version" | cut -d . -f 3)
 
-  minor_version=$((prev_minor_version + 1))
+  patch_version=$((prev_patch_version + 1))
 
-  echo "$prev_major_version.$minor_version.0"
+  echo "$prev_major_minor_version.$patch_version"
 }
 
 
-bake_task build "Builds the game in development mode."
-function build {
-  local env node_env
+function version.json
+{
+  local image version
+  local git_url git_sha git_message escaped_git_message
+  local build_timestamp build_host build_user
 
-  env=${1:-dev}
-  if [ "$env" == "dev" ]; then
+  # Example verision: 20180101.52
+  image=$1
+  version=$2
+
+  git_url="$(git config --get remote.origin.url || echo none)"
+  git_sha="$(git rev-parse HEAD || echo none)"
+  git_message="$(git log -1 --pretty=%B || echo none)"
+  escaped_git_message="$(echo "$git_message" | perl -pe 's/[^a-zA-Z0-9\#\.\-_ \t\@\\r\\n]/ /g')"
+
+  build_timestamp="$(date -u +"%Y%m%dT%H%M%SZ")"
+  build_host="${BUILD_HOST:-$(hostname)}"
+  build_user="${USER:-robot}"
+
+  cat > version.json <<END
+{
+  "version": "$version",
+  "image": "$image",
+  "git-url": "$git_url",
+  "git-sha": "$git_sha",
+  "git-message": "$escaped_git_message",
+  "build-host": "$build_host",
+  "build-timestamp": "$build_timestamp",
+  "build-user": "$build_user"
+}
+END
+
+  bake_echo_green "Created version.json:"
+  bake_echo_yellow "$(sed -e '2,$s/^/  /' <(cat version.json))"
+}
+
+
+bake_task tag "Tags the current branch with the next version."
+function tag ()
+{
+  bake.configs.setup
+
+  git fetch --tags
+
+  local version
+  version=$(version.next)
+
+  if version.exists; then
+    bake_echo_green "$version already exists. Skipping tag."
+    return 0
+  fi
+
+  git tag -a "v_$version" -m "Version $version"
+  git push --tags
+
+  bake_echo_green "Successfully tagged $version"
+}
+
+
+bake_task build "Builds the game for a specific tier."
+function build {
+  local tier node_env
+
+  if [ "$#" -lt 1 ]; then
+    bake_echo_red "usage: bake build dev|prod"
+    exit 1
+  fi
+
+  tier=$1
+
+  if [ "$tier" == "dev" ]; then
     node_env='development'
   else
     node_env='production'
@@ -53,32 +145,27 @@ function build {
 }
 
 
-bake_task build:prod "Builds the game in production mode."
-function build:prod {
-  build prod
-}
-
 bake_task compose "Runs docker compose."
 function compose {
-  docker-compose -f 'build/docker-compose.yml' "$@"
+  docker-compose -f 'build/docker-compose.live.yml' "$@"
 }
 
 
-bake_task exec "Execs into the game server."
+bake_task exec "Runs a command in the game server container."
 function exec {
-  docker-compose -f 'build/docker-compose.live.yml' run server "$@"
+  compose run server "$@"
 }
 
 
-bake_task yarn "Runs yarn in the container."
+bake_task yarn "Runs yarn in the game server container."
 function yarn {
-  docker-compose -f 'build/docker-compose.live.yml' run server yarn "$@"
+  compose run server yarn "$@"
 }
 
 
 bake_task run "Runs the game."
 function run {
-  compose up
+  docker-compose -f 'build/docker-compose.yml' up
 }
 
 
@@ -96,82 +183,74 @@ function run:live {
     bake_echo_green "Cache completed. Run 'bake yarn' to update."
   fi
 
-  docker-compose -f 'build/docker-compose.live.yml' up
+  compose up
 }
 
 
-bake_task push "Pushes the development build."
+bake_task push "Pushes a build of the specified tier up."
 function push {
-  local env version
+  if [ -n "$(git status -s)" ]; then
+    bake_echo_red "You have uncommitted changes. Aborting the push."
+    return 1
+  fi
 
-  git fetch --tags
+  if [ "$#" -lt 1 ]; then
+    bake_echo_red "usage: bake push dev|prod"
+    return 1
+  fi
 
-  version=${1:-$(version.next)}
-  env=${2:-dev}
+  local tier version tag
+  tier=$1
+  version=$(version.next)
+  tag=$version-$tier
 
-  bake_echo_yellow "Building $version"
-  build "$env"
+  bake_echo_yellow "Building $tag"
+  build "$tier"
 
   bake_echo_yellow "Pushing client files to s3"
-  aws s3 sync "./dist/client/" "s3://pong-client-builds/$env/$version" --delete
+  aws s3 sync "./dist/client/" "s3://pong-client-builds/$tier/$version" --delete
 
   bake_echo_yellow "Pushing server image to ecr"
-  local image_id="344778228378.dkr.ecr.us-west-2.amazonaws.com/pong:$env-$version"
+  local image_id="344778228378.dkr.ecr.us-west-2.amazonaws.com/pong:$tag"
   docker tag pong:latest "$image_id"
   docker push "$image_id"
 }
 
 
-bake_task push:prod "Pushes the production build."
-function push:prod {
-  local version
-  version=${1:-$(version.next)}
-
-  git tag -a "v_$version" -m "$version"
-  git push --tags
-
-  push "$version" prod
-}
-
-
 bake_task deploy "Deploys a build to an environment."
 function deploy {
-  local build_env version env
-
   if [ "$#" -lt 1 ]; then
-    bake_echo_red "usage: bake deploy ENV [BUILD_ENV] [VERSION]"
-    exit 1
+    bake_echo_red "usage: bake deploy ENV [VERSION] [TIER]"
+    return 1
   fi
+
+  local tier version env tag
 
   env=$1
-  build_env=${2:-dev}
-
-  if [ "$build_env" == 'dev' ]; then
-    version=${3:-$(version.next)}
-  else
-    version=${3:-$(version.latest)}
-  fi
+  version=${2:-$(version.next)}
+  tier=${3:-dev}
+  tag=$version-$tier
 
   local builds_bucket deploy_bucket image_id
 
-  builds_bucket="s3://pong-client-builds/$build_env/$version"
+  builds_bucket="s3://pong-client-builds/$tier/$version"
   deploy_bucket="s3://pong-$env-site"
-  image_id="344778228378.dkr.ecr.us-west-2.amazonaws.com/pong:$build_env-$version"
+  image_id="344778228378.dkr.ecr.us-west-2.amazonaws.com/pong:$tag"
 
   if ! aws s3 ls "$builds_bucket" >/dev/null; then
     bake_echo_red "$builds_bucket does not exist in S3"
     exit 1
   fi
 
-  if ! aws ecr list-images --registry-id 344778228378 --repository-name pong | grep "$build_env-$version" >/dev/null; then
+  if ! aws ecr list-images --registry-id 344778228378 --repository-name pong | grep "$tag" >/dev/null; then
     bake_echo_red "$image_id does not exist in ECR"
     exit 1
   fi
 
-  bake_echo_yellow "Deploying $build_env-$version build to client $env"
+  bake_echo_yellow "Deploying $tag build to client $env"
   aws s3 sync "$builds_bucket" "$deploy_bucket" --delete
 
-  bake_echo_yellow "Deploying $build_env-$version build to server $env"
+  bake_echo_yellow "Deploying $tag build to server $env"
 
   local taskdef task
   taskdef=$(jq ". | .containerDefinitions[0].image = \"$image_id\" | ." deploy/task-definition.json)

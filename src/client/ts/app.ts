@@ -13,7 +13,6 @@ export const setup = (): State => {
 
   // Setup crap
   const boxA = Matter.Bodies.rectangle(400, 200, 80, 80);
-  Matter.World.add(engine.world, boxA)
 
   return {engine, render}
 }
