@@ -40,6 +40,7 @@ module.exports = {
     new CopyWebpackPlugin([
       { from: './src/client/*.html', to: path.resolve('./dist/client/'), flatten:true },
       { from: './src/client/css', to: path.resolve('./dist/client/css') },
+      { from: './version.json', to: path.resolve('./dist/client/')}
     ]),
   ],
 };

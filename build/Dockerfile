@@ -21,6 +21,7 @@ WORKDIR /game
 COPY src ./src
 COPY yarn.lock ./yarn.lock
 COPY package.json ./package.json
+COPY version.json ./version.json
 
 RUN yarn
 

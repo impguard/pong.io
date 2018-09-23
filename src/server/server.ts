@@ -2,6 +2,7 @@ import * as http from 'http'
 import * as Koa from 'koa'
 import * as Router from 'koa-router'
 import * as io from 'socket.io'
+import * as fs from 'fs'
 
 import { config } from './config'
 
@@ -37,6 +38,11 @@ router.get('/reset', (ctx) => {
   ctx.body = {
     'state': 'RESET'
   }
+})
+
+router.get('/version', (ctx) => {
+  ctx.type = 'json'
+  ctx.body = fs.createReadStream('version.json')
 })
 
 app.use(router.routes())
