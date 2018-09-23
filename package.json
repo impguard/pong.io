@@ -16,9 +16,11 @@
     "live:server": "nodemon -e 'ts' --watch 'src/server' --exec npx ts-node --project src/server/tsconfig.json src/server/server.ts"
   },
   "dependencies": {
+    "@types/lodash": "^4.14.116",
     "jquery": "^3.3.1",
     "koa": "^2.5.2",
     "koa-router": "^7.4.0",
+    "lodash": "^4.17.11",
     "matter-js": "^0.14.2",
     "pixi.js": "^4.8.2",
     "socket.io": "^2.1.1"

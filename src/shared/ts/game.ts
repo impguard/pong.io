@@ -1,14 +1,21 @@
-import * as Matter from "matter-js";
-import * as $ from "jquery"
+import * as Matter from 'matter-js';
+import * as $ from 'jquery'
+import * as _ from 'lodash'
 
 
 export interface State {
   engine: Matter.Engine,
   runner: Matter.Runner,
   render?: Matter.Render,
+  config: Config
   balls: {
     [key: number]: Matter.Body
-  }
+  },
+}
+
+export interface Input {
+  left: number,
+  right: number,
 }
 
 export interface Config {
@@ -51,53 +58,53 @@ export const create = (config: Config, element?: HTMLElement): State => {
     })
 
     // @ts-ignore
-    Matter.Render.lookAt(render, [
-      {x: -400, y: -400},
-      {x: 400, y: 400}
-    ])
+    Matter.Render.lookAt(render, {
+      min: {x: -400, y: -400},
+      max: {x: 400, y: 400}
+    })
   }
 
-  const state: State = {
-    balls: {},
+  return {
+    config,
     engine,
     runner,
     render,
+    balls: {}
   }
-
-  for (let i = 0; i < config.numBalls; i++) {
-    spawnBall(state, config.ball.radius)
-  }
-
-  return state
 }
 
 
-export const tick = (state: State, config: Config) => {
-  Object.keys(state.balls).forEach((id) => {
-    const ball: Matter.Body = state.balls[id]
+export const tick = (state: State) => {
+  _.forEach(state.balls, (ball: Matter.Body) => {
     const distance = Matter.Vector.magnitude(ball.position)
-    
-    if (distance > config.arena.radius) {
-      resetBall(ball, config)
+
+    if (distance > state.config.arena.radius) {
+      resetBall(state, ball)
     }
   })
 }
 
 
-export const resetBall = (ball, config: Config) => {
+export const onBeforeTick = (state: State, callback: (e: any) => void) => {
+  Matter.Events.on(state.runner, 'beforeTick', callback)
+}
+
+
+export const resetBall = (state: State, ball: Matter.Body) => {
   const x = 2 * Math.random() - 1
   const y = 2 * Math.random() - 1
 
   const direction = Matter.Vector.normalise(Matter.Vector.create(x, y))
-  const velocity = Matter.Vector.mult(direction, config.ball.speed.max)
+  const velocity = Matter.Vector.mult(direction, state.config.ball.speed.max)
 
   Matter.Body.setPosition(ball, Matter.Vector.create(0, 0))
   Matter.Body.setVelocity(ball, velocity)
 }
 
 
-const spawnBall = (state: State, radius) => {
-  const ball = Matter.Bodies.circle(0, 0, radius, {
+export const spawnBall = (state: State, id?: number) => {
+  const ball = Matter.Bodies.circle(0, 0, state.config.ball.radius, {
+    ...id && { id },
     restitution: 1,
     friction: 0,
     frictionAir: 0,
@@ -118,12 +125,8 @@ const spawnBall = (state: State, radius) => {
 
 export const destroy = (state: State) => {
   if (state.render) {
-    Matter.Render.stop(state.render)
     $(state.render.canvas).remove()
   }
-
-  Matter.Runner.stop(state.runner)
-  Matter.Engine.clear(state.engine)
 }
 
 
@@ -132,5 +135,14 @@ export const run = (state: State) =>  {
     Matter.Render.run(state.render)
   }
 
-  Matter.Runner.run(state.engine)
+  Matter.Runner.run(state.runner, state.engine)
+}
+
+
+export const stop = (state: State) => {
+  if (state.render) {
+    Matter.Render.stop(state.render)
+  }
+
+  Matter.Runner.stop(state.runner)
 }

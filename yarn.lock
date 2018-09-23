@@ -84,6 +84,10 @@
     "@types/koa-compose" "*"
     "@types/node" "*"
 
+"@types/lodash@^4.14.116":
+  version "4.14.116"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.116.tgz#5ccf215653e3e8c786a58390751033a9adca0eb9"
+
 "@types/matter-js@^0.10.1":
   version "0.10.1"
   resolved "https://registry.yarnpkg.com/@types/matter-js/-/matter-js-0.10.1.tgz#f7d82f3a28d6e59aae63f8ae285303606193a0c1"
@@ -2207,6 +2211,10 @@ lodash.debounce@^4.0.8:
 lodash@^4.17.10:
   version "4.17.10"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.10.tgz#1b7793cf7259ea38fb3661d4d38b3260af8ae4e7"
+
+lodash@^4.17.11:
+  version "4.17.11"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
 
 log-symbols@^2.1.0, log-symbols@^2.2.0:
   version "2.2.0"

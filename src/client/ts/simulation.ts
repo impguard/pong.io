@@ -1,6 +1,8 @@
 import * as $ from 'jquery'
+import * as _ from 'lodash'
 import * as Matter from 'matter-js'
 import * as State from './state'
+import * as Gamepad from './gamepad'
 import * as Game from '../../shared/ts/game'
 
 
@@ -22,15 +24,27 @@ export const setup = (app: State.App, element: HTMLElement, socket: SocketIOClie
 
   app.game = Game.create(config, element)
 
-  Object.keys(app.game.balls).forEach((id) => {
-    const ball = app.game.balls[id]
-    Game.resetBall(ball, config)
+  _.times(app.game.config.numBalls, () => {
+    const ball = Game.spawnBall(app.game)
+    Game.resetBall(app.game, ball)
   })
+
+  Game.onBeforeTick(app.game, () => Game.tick(app.game))
+}
+
+export const tick = (app: State.App) => {
+  const input = Gamepad.sample()
+
+  Game.tick(app.game)
 }
 
 
 export const run = (app: State.App) => {
   Game.run(app.game)
+}
+
+export const stop = (app: State.App) => {
+  Game.stop(app.game)
 }
 
 export const destroy = (app: State.App) => {
