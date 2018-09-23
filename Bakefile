@@ -265,6 +265,11 @@ function deploy {
 
 bake_task server:start "Starts a game server."
 function server:start {
+  if [ "$#" -lt 1 ]; then
+    bake_echo_red "usage: bake server:start TASKDEFARN"
+    return 1
+  fi
+
   local taskdefarn taskrun
 
   taskdefarn=$1
@@ -283,6 +288,11 @@ function server:deploys {
 
 bake_task server:stop "Stops a game server."
 function server:stop {
+  if [ "$#" -lt 1 ]; then
+    bake_echo_red "usage: bake server:stop TASKARN"
+    return 1
+  fi
+
   aws ecs stop-task --cluster "pong-sandbox" --task "$1" >/dev/null
   bake_echo_green "Server stopped!"
 }
@@ -301,12 +311,14 @@ function server:ls {
 
 bake_task server:info "Shows the information for a game server task."
 function server:info {
-  local taskdefarn=$1
+  if [ "$#" -lt 1 ]; then
+    bake_echo_red "usage: bake server:info TASKARN"
+    return 1
+  fi
 
-  description=$(aws ecs describe-tasks --cluster "pong-sandbox" --tasks "$taskdefarn")
+  local description arn port ip status container_instance_arn instance_id
 
-  local arn port ip status container_instance_arn instance_id
-
+  description=$(aws ecs describe-tasks --cluster "pong-sandbox" --tasks "$1")
   arn=$(echo "$description" | jq -r '.tasks[0].taskArn')
   status=$(echo "$description" | jq -r '.tasks[0].lastStatus')
   port=$(echo "$description" | jq -r '.tasks[0].containers[0].networkBindings[0].hostPort')
