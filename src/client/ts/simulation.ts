@@ -24,11 +24,6 @@ export const setup = (app: State.App, element: HTMLElement, socket: SocketIOClie
 
   app.game = Game.create(config, element)
 
-  _.times(app.game.config.numBalls, () => {
-    const ball = Game.spawnBall(app.game)
-    Game.resetBall(app.game, ball)
-  })
-
   Game.onBeforeTick(app.game, () => Game.tick(app.game))
 }
 

@@ -3,22 +3,17 @@ import * as Koa from 'koa'
 import * as Router from 'koa-router'
 import * as io from 'socket.io'
 import * as fs from 'fs'
-
-import { config } from './config'
-
-/****************************************
- * State
- ****************************************/
-
-const state = {
-  io: null,
-}
+import * as _ from 'lodash'
+import * as State from './state'
+import * as Simulation from './simulation'
+import { setupMaster } from 'cluster';
+import { Socket } from 'net';
 
 /****************************************
- * Web Server and Application
+ * Koa Application
  ****************************************/
 
-const app = new Koa()
+const koa = new Koa()
 const router = new Router()
 
 router.get('/health', (ctx) => {
@@ -43,32 +38,40 @@ router.get('/version', (ctx) => {
   ctx.body = fs.createReadStream('version.json')
 })
 
-app.use(router.routes())
+koa.use(router.routes())
    .use(router.allowedMethods())
 
-const server = http.createServer(app.callback())
-state.io = io(server)
+const server = http.createServer(koa.callback())
 
-state.io.on('connection', (client) => {
-  client.on('disconnect', (client) => {
-    var playersRemaining = state.io.sockets.connections != null
-      ? Object.keys(state.io.sockets.connections).length
-      : 0
+/****************************************
+ * Game Application
+ ****************************************/
 
-    if (playersRemaining == 0) {
-      console.log("No players remaining, resetting...")
+const create = () => {
+  const app: State.App = {
+    game: null,
+    server: io(server),
+  }
+
+  app.server.on('connection', socket => {
+    setup(app, socket)
+  })
+}
+
+const setup = (app: State.App, socket: SocketIO.Socket) => {
+  socket.on('disconnect', () => {
+    const remaining = _.size(app.server.sockets.sockets)
+
+    if (remaining === 0) {
+      console.log('No players remaining!')
     }
   })
 
-  client.emit('accepted')
-  console.log("Accepted player...")
-})
+  socket.emit('accepted')
 
-/****************************************
- * Entrypoint
- ****************************************/
+  console.log('Accepted player!')
+}
 
 server.listen(80, () => {
-  setInterval(() => {
-  }, config.GAME_LOOP_SPEED)
+  const app = create()
 })
