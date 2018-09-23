@@ -16,6 +16,7 @@
     "live:server": "nodemon -e 'ts' --watch 'src/server' --exec npx ts-node --project src/server/tsconfig.json src/server/server.ts"
   },
   "dependencies": {
+    "jquery": "^3.3.1",
     "koa": "^2.5.2",
     "koa-router": "^7.4.0",
     "matter-js": "^0.14.2",
@@ -23,6 +24,7 @@
     "socket.io": "^2.1.1"
   },
   "devDependencies": {
+    "@types/jquery": "^3.3.9",
     "@types/koa": "^2.0.46",
     "@types/koa-router": "^7.0.31",
     "@types/matter-js": "^0.10.1",

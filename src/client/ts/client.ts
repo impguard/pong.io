@@ -1,54 +1,74 @@
-import * as app from './app'
+import * as $ from 'jquery'
 import * as io from 'socket.io-client'
+import * as simulation from './simulation'
 import * as scene from './scene'
+import * as State from './state'
 
-const state = {
+
+const app: State.App = {
   socket: null,
+  server: null,
+  name: null,
+  started: false,
   accepted: false,
   simulation: null,
 }
 
-const play = document.getElementById('play')
-const reset = document.getElementById('reset')
+/**
+ * State Handlers
+ */
 
-play.addEventListener('click', () => {
-  const name = (<HTMLInputElement> document.getElementById('name')).value
-  const host = (<HTMLInputElement> document.getElementById('host')).value
-  const port = (<HTMLInputElement> document.getElementById('port')).value
+const connect = (app: State.App, name, host, port) => {
+  if (app.socket) app.socket.disconnect()
 
-  if (state.socket) state.socket.disconnect()
-  state.socket = io(`${host}:${port}`)
-  state.socket.on('connect', connect, name)
-})
+  app.server = {host, port}
+  app.name = name
+  app.socket = io(`${host}:${port}`)
 
-reset.addEventListener('click', () => {
-  const host = 'localhost'
-  const port = '7777'
+  setup(app.socket)
+}
 
-  fetch(`http://${host}:${port}/reset`)
+const setup = (socket: SocketIOClient.Socket) => {
+  socket.emit('join', name)
 
-  cleanUp()
-})
+  socket.on('disconnect', reset)
+  socket.on('accepted', () => {
+    app.accepted = true
 
-const connect = (name: string) => {
-  state.socket.emit('newPlayer', name)
+    const element = $("#game").get(0)
 
-  state.socket.on('disconnect', cleanUp)
-  state.socket.on('accepted', () => {
-    state.accepted = true
-
-    state.simulation = app.run(app.setup())
+    simulation.setup(app, element, socket)
+    simulation.run(app)
 
     scene.change(scene.Name.Game)
   })
 }
 
-const cleanUp = () => {
-  if (state.accepted) {
-    app.destroy(state.simulation)
-    state.accepted = false
-  }
-  state.socket.disconnect()
+const reset = (app: State.App) => {
+  if (app.socket) app.socket.disconnect()
+  if (app.simulation) simulation.destroy(app)
 
+  app.accepted = false
   scene.change(scene.Name.Home)
 }
+
+/**
+ * User Events
+ */
+
+$('#play').click(() =>  {
+  const name = $("#name").val()
+  const host = $("#host").val()
+  const port = $("#port").val()
+
+  connect(app, name, host, port)
+})
+
+$('#reset').click(() => {
+  const host = app.server.host
+  const port = app.server.port
+
+  fetch(`http://${host}:${port}/reset`)
+
+  reset(app)
+})
