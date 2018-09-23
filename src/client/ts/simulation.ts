@@ -3,13 +3,21 @@ import * as State from './state'
 
 
 export const setup = (app: State.App, element: HTMLElement, socket: SocketIOClient.Socket) => {
-  const engine = Matter.Engine.create()
-  const render = Matter.Render.create({element, engine})
-
-  // Initial Setup
+  // initial setup
   const box = Matter.Bodies.rectangle(400, 200, 80, 80);
 
-  Matter.World.add(engine.world, box)
+  const world = Matter.World.create({
+    gravity: {
+      scale: 0,
+      x: 0,
+      y: 0,
+    }
+  })
+
+  Matter.World.add(world, box)
+
+  const engine = Matter.Engine.create({world})
+  const render = Matter.Render.create({element, engine})
 
   // Socket Setup
 

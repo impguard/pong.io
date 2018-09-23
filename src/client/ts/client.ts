@@ -31,7 +31,12 @@ const connect = (app: State.App, name, host, port) => {
 const setup = (socket: SocketIOClient.Socket) => {
   socket.emit('join', name)
 
-  socket.on('disconnect', reset)
+  socket.on('disconnect', (reason) => {
+   if (reason === 'io server disconnect') {
+      reset(app)
+    }
+  })
+
   socket.on('accepted', () => {
     app.accepted = true
 
@@ -45,6 +50,7 @@ const setup = (socket: SocketIOClient.Socket) => {
 }
 
 const reset = (app: State.App) => {
+  debugger
   if (app.socket) app.socket.disconnect()
   if (app.simulation) simulation.destroy(app)
 

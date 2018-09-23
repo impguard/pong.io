@@ -21,12 +21,6 @@ const state = {
 const app = new Koa()
 const router = new Router()
 
-const cors = {
-  'Access-Control-Allow-Origin': 'http://localhost:7778',
-  'Access-Control-Allow-Methods': 'GET',
-  'Access-Control-Allow-Headers': 'Content-Type',
-}
-
 router.get('/health', (ctx) => {
   ctx.body = {
     'health': 'ENABLED'
@@ -34,7 +28,11 @@ router.get('/health', (ctx) => {
 })
 
 router.get('/reset', (ctx) => {
-  ctx.set(cors)
+  ctx.set({
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  })
   ctx.body = {
     'state': 'RESET'
   }
