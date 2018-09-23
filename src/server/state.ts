@@ -1,4 +1,4 @@
-import * as Game from '../shared/ts/game'
+import * as Game from '../shared/game'
 
 
 export interface App {

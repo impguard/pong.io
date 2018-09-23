@@ -1,5 +1,40 @@
-export const config = {
-  START_MATCH_TIME: 5000,
-  END_MATCH_TIME: 300000,
-  GAME_LOOP_SPEED: 1000,
+
+import * as Game from '../shared/game'
+
+
+interface Config {
+  app: {
+    match: {
+      delay: number,
+      timeout: number,
+    },
+  },  
+  game: Game.Config,
 }
+
+
+const config: Config = {
+  game: {
+    arena: {
+      radius: 300
+    },
+    ball: {
+      speed: {
+        min: 1,
+        max: 2,
+      },
+      radius: 5,
+    },
+    numBalls: 10,
+    numPlayers: 10,
+    delta: 16,
+  },
+  app: {
+    match: {
+      delay: 5000,
+      timeout: 300000,
+    },
+  },
+}
+
+export default config

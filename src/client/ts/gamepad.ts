@@ -1,6 +1,6 @@
 import * as $ from 'jquery'
 import * as _ from 'lodash'
-import * as Game from '../../shared/ts/game'
+import * as Game from '../../shared/game'
 
 
 const input: Game.Input = {

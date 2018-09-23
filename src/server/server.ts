@@ -6,8 +6,7 @@ import * as fs from 'fs'
 import * as _ from 'lodash'
 import * as State from './state'
 import * as Simulation from './simulation'
-import { setupMaster } from 'cluster';
-import { Socket } from 'net';
+import config from './config'
 
 /****************************************
  * Koa Application
@@ -41,7 +40,7 @@ router.get('/version', (ctx) => {
 koa.use(router.routes())
    .use(router.allowedMethods())
 
-const server = http.createServer(koa.callback())
+const httpServer = http.createServer(koa.callback())
 
 /****************************************
  * Game Application
@@ -50,15 +49,21 @@ const server = http.createServer(koa.callback())
 const create = () => {
   const app: State.App = {
     game: null,
-    server: io(server),
+    server: io(httpServer),
   }
 
+  Simulation.setup(app)
+
   app.server.on('connection', socket => {
-    setup(app, socket)
+    add(app, socket)
+
+    socket.emit('accepted', app.game.config)
+
+    console.log('Accepted player!')
   })
 }
 
-const setup = (app: State.App, socket: SocketIO.Socket) => {
+const add = (app: State.App, socket: SocketIO.Socket) => {
   socket.on('disconnect', () => {
     const remaining = _.size(app.server.sockets.sockets)
 
@@ -66,12 +71,8 @@ const setup = (app: State.App, socket: SocketIO.Socket) => {
       console.log('No players remaining!')
     }
   })
-
-  socket.emit('accepted')
-
-  console.log('Accepted player!')
 }
 
-server.listen(80, () => {
+httpServer.listen(80, () => {
   const app = create()
 })

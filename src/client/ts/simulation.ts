@@ -3,28 +3,19 @@ import * as _ from 'lodash'
 import * as Matter from 'matter-js'
 import * as State from './state'
 import * as Gamepad from './gamepad'
-import * as Game from '../../shared/ts/game'
+import * as Game from '../../shared/game'
 
 
-export const setup = (app: State.App, element: HTMLElement, socket: SocketIOClient.Socket) => {
-  const config = {
-    arena: {
-      radius: 300
-    },
-    ball: {
-      speed: {
-        min: 1,
-        max: 2,
-      },
-      radius: 5,
-    },
-    numBalls: 10,
-    numPlayers: 10,
-  }
+interface ISimulationOptions {
+  element: HTMLElement,
+  socket: SocketIOClient.Socket,
+  config: Game.Config,
+}
 
-  app.game = Game.create(config, element)
+export const setup = (app: State.App, options: ISimulationOptions) => {
+  app.game = Game.create(options.config, options.element)
 
-  Game.onBeforeTick(app.game, () => Game.tick(app.game))
+  Game.onBeforeTick(app.game, () => tick(app))
 }
 
 export const tick = (app: State.App) => {
@@ -44,4 +35,5 @@ export const stop = (app: State.App) => {
 
 export const destroy = (app: State.App) => {
   Game.destroy(app.game)
+  app.game = null
 }

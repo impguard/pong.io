@@ -3,7 +3,7 @@ import * as io from 'socket.io-client'
 import * as Simulation from './simulation'
 import * as Scene from './scene'
 import * as State from './state'
-import * as Game from '../../shared/ts/game'
+import * as Game from '../../shared/game'
 
 
 const app: State.App = {
@@ -38,12 +38,12 @@ const setup = (socket: SocketIOClient.Socket) => {
     }
   })
 
-  socket.on('accepted', () => {
+  socket.on('accepted', (config) => {
     app.accepted = true
 
     const element = $("#game").get(0)
 
-    Simulation.setup(app, element, socket)
+    Simulation.setup(app, {element, config, socket})
     Simulation.run(app)
 
     Scene.change(Scene.Name.Game)

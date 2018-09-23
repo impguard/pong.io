@@ -31,9 +31,10 @@ export interface Config {
     },
     radius: number,
   },
+  delta: number,
 }
 
-export const create = (config: Config, element?: HTMLElement): State => {
+export const create = (config: Config, element?: any): State => {
   const world = Matter.World.create({
     gravity: {
       scale: 0, x: 0, y: 0
