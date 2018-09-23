@@ -1,39 +1,38 @@
+import * as $ from 'jquery'
 import * as Matter from 'matter-js'
 import * as State from './state'
+import * as Game from '../../shared/ts/game'
 
 
 export const setup = (app: State.App, element: HTMLElement, socket: SocketIOClient.Socket) => {
-  // initial setup
-  const box = Matter.Bodies.rectangle(400, 200, 80, 80);
+  const config = {
+    arena: {
+      radius: 300
+    },
+    ball: {
+      speed: {
+        min: 1,
+        max: 2,
+      },
+      radius: 5,
+    },
+    numBalls: 10,
+    numPlayers: 10,
+  }
 
-  const world = Matter.World.create({
-    gravity: {
-      scale: 0,
-      x: 0,
-      y: 0,
-    }
+  app.game = Game.create(config, element)
+
+  Object.keys(app.game.balls).forEach((id) => {
+    const ball = app.game.balls[id]
+    Game.resetBall(ball, config)
   })
-
-  Matter.World.add(world, box)
-
-  const engine = Matter.Engine.create({world})
-  const render = Matter.Render.create({element, engine})
-
-  // Socket Setup
-
-  app.simulation = {engine, render}
 }
 
+
+export const run = (app: State.App) => {
+  Game.run(app.game)
+}
 
 export const destroy = (app: State.App) => {
-  Matter.Render.stop(app.simulation.render)
-  Matter.Engine.clear(app.simulation.engine)
-
-  app.simulation = null
-}
-
-
-export const run = (app: State.App) =>  {
-  Matter.Engine.run(app.simulation.engine)
-  Matter.Render.run(app.simulation.render)
+  Game.destroy(app.game)
 }

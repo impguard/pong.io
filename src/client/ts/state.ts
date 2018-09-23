@@ -1,3 +1,6 @@
+import * as Game from '../../shared/ts/game'
+
+
 export interface App {
   socket: SocketIOClient.Socket,
   server: {
@@ -8,8 +11,5 @@ export interface App {
   started: boolean,
   accepted: boolean,
 
-  simulation: {
-    engine: Matter.Engine,
-    render: Matter.Render,
-  }
+  game: Game.State
 }

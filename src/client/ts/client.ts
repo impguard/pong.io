@@ -1,8 +1,9 @@
 import * as $ from 'jquery'
 import * as io from 'socket.io-client'
-import * as simulation from './simulation'
-import * as scene from './scene'
+import * as Simulation from './simulation'
+import * as Scene from './scene'
 import * as State from './state'
+import * as Game from '../../shared/ts/game'
 
 
 const app: State.App = {
@@ -11,7 +12,7 @@ const app: State.App = {
   name: null,
   started: false,
   accepted: false,
-  simulation: null,
+  game: null,
 }
 
 /**
@@ -42,20 +43,19 @@ const setup = (socket: SocketIOClient.Socket) => {
 
     const element = $("#game").get(0)
 
-    simulation.setup(app, element, socket)
-    simulation.run(app)
+    Simulation.setup(app, element, socket)
+    Simulation.run(app)
 
-    scene.change(scene.Name.Game)
+    Scene.change(Scene.Name.Game)
   })
 }
 
 const reset = (app: State.App) => {
-  debugger
   if (app.socket) app.socket.disconnect()
-  if (app.simulation) simulation.destroy(app)
+  if (app.game) Simulation.destroy(app)
 
   app.accepted = false
-  scene.change(scene.Name.Home)
+  Scene.change(Scene.Name.Home)
 }
 
 /**
