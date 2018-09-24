@@ -136,8 +136,8 @@ export const spawnPlayers = (state: State) => {
 
   const posts = _.map(_.range(0, state.config.numPlayers), (number) => {
     const angle = number * theta
-    const x = (radius - 1) * Math.cos(angle)
-    const y = (radius - 1) * Math.sin(angle)
+    const x = radius * Math.cos(angle)
+    const y = radius * Math.sin(angle)
 
     const position = Matter.Vector.create(x, y)
 
