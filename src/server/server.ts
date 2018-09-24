@@ -61,7 +61,6 @@ const create = () => {
     add(app, socket)
 
     console.log('Accepted player!')
-    console.log('HELLO')
   })
 
   return app
