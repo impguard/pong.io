@@ -4,6 +4,9 @@ import * as Game from '../shared/game'
 
 interface Config {
   app: {
+    network: {
+      delta: number,
+    }
     match: {
       delay: number,
       timeout: number,
@@ -30,6 +33,9 @@ const config: Config = {
     delta: 16,
   },
   app: {
+    network: {
+      delta: 100,
+    },
     match: {
       delay: 5000,
       timeout: 300000,

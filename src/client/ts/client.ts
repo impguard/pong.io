@@ -13,6 +13,7 @@ const app: State.App = {
   started: false,
   accepted: false,
   game: null,
+  render: null,
 }
 
 /**
@@ -38,15 +39,19 @@ const setup = (socket: SocketIOClient.Socket) => {
     }
   })
 
-  socket.on('accepted', (config) => {
+  socket.on('accepted', (config: Game.Config) => {
     app.accepted = true
 
     const element = $("#game").get(0)
 
-    Simulation.setup(app, {element, config, socket})
+    Simulation.setup(app, {element, config})
     Simulation.run(app)
 
     Scene.change(Scene.Name.Game)
+  })
+
+  socket.on('gamestate', (sample: Game.Sample) => {
+    Simulation.sync(app, sample)
   })
 }
 

@@ -1,15 +1,27 @@
 import * as Matter from 'matter-js';
-import * as $ from 'jquery'
 import * as _ from 'lodash'
 
 
 export interface State {
   engine: Matter.Engine,
-  runner: Matter.Runner,
-  render?: Matter.Render,
   config: Config
+  runner: {
+    id?: any,
+    beforeTick: (() => void)[],
+  },
   balls: {
-    [key: number]: Matter.Body
+    [id: number]: Matter.Body
+  },
+}
+
+export interface Sample {
+  balls: {
+    [id: number]: {
+      x: number,
+      y: number,
+      vx: number,
+      vy: number,
+    }
   },
 }
 
@@ -34,60 +46,28 @@ export interface Config {
   delta: number,
 }
 
-export const create = (config: Config, element?: any): State => {
+export const create = (config: Config): State => {
   const world = Matter.World.create({
     gravity: {
       scale: 0, x: 0, y: 0
     }
   })
 
-  const runner = Matter.Runner.create({
-    delta: 16,
-    isFixed: true,
-  })
   const engine = Matter.Engine.create({world})
-
-  let render = null
-  if (element) {
-    render = Matter.Render.create({
-      options: {
-        width: 800,
-        height: 800,
-      },
-      element,
-      engine
-    })
-
-    // @ts-ignore
-    Matter.Render.lookAt(render, {
-      min: {x: -400, y: -400},
-      max: {x: 400, y: 400}
-    })
-  }
 
   return {
     config,
     engine,
-    runner,
-    render,
-    balls: {}
+    balls: {},
+    runner: {
+      beforeTick: []
+    }
   }
 }
 
 
-export const tick = (state: State) => {
-  _.forEach(state.balls, (ball: Matter.Body) => {
-    const distance = Matter.Vector.magnitude(ball.position)
-
-    if (distance > state.config.arena.radius) {
-      resetBall(state, ball)
-    }
-  })
-}
-
-
-export const onBeforeTick = (state: State, callback: (e: any) => void) => {
-  Matter.Events.on(state.runner, 'beforeTick', callback)
+export const onBeforeTick = (state: State, callback: () => void) => {
+  state.runner.beforeTick.push(callback)
 }
 
 
@@ -125,25 +105,19 @@ export const spawnBall = (state: State, id?: number) => {
 
 
 export const destroy = (state: State) => {
-  if (state.render) {
-    $(state.render.canvas).remove()
-  }
+  Matter.Engine.clear(state.engine)
 }
 
 
 export const run = (state: State) =>  {
-  if (state.render) {
-    Matter.Render.run(state.render)
-  }
+  state.runner.id = setInterval(() => {
+    _.forEach(state.runner.beforeTick, callback => callback())
 
-  Matter.Runner.run(state.runner, state.engine)
+    Matter.Engine.update(state.engine, state.config.delta)
+  }, state.config.delta)
 }
 
 
 export const stop = (state: State) => {
-  if (state.render) {
-    Matter.Render.stop(state.render)
-  }
-
-  Matter.Runner.stop(state.runner)
+  clearInterval(state.runner.id)  
 }

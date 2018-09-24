@@ -12,4 +12,5 @@ export interface App {
   accepted: boolean,
 
   game: Game.State
+  render: Matter.Render
 }

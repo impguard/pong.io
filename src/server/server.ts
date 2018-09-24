@@ -53,19 +53,23 @@ const create = () => {
   }
 
   Simulation.setup(app)
-
+  
   app.server.on('connection', socket => {
+    socket.emit('accepted', app.game.config)
+    socket.join('players')
+
     add(app, socket)
 
-    socket.emit('accepted', app.game.config)
-
     console.log('Accepted player!')
+    console.log('HELLO')
   })
+
+  return app
 }
 
 const add = (app: State.App, socket: SocketIO.Socket) => {
   socket.on('disconnect', () => {
-    const remaining = _.size(app.server.sockets.sockets)
+    const remaining = _.size(app.server.of('players').sockets)
 
     if (remaining === 0) {
       console.log('No players remaining!')
@@ -75,4 +79,11 @@ const add = (app: State.App, socket: SocketIO.Socket) => {
 
 httpServer.listen(80, () => {
   const app = create()
+
+  Simulation.run(app)
+
+  setInterval(() => {
+    app.server.to('players').emit('gamestate', Simulation.sample(app))
+
+  }, config.app.network.delta)
 })
