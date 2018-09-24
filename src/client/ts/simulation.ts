@@ -14,6 +14,8 @@ interface ISimulationOptions {
 export const setup = (app: State.App, options: ISimulationOptions) => {
   app.game = Game.create(options.config)
 
+  Game.spawnPlayers(app.game)
+
   const render = Matter.Render.create({
     options: {
       width: 800,
@@ -36,9 +38,12 @@ export const setup = (app: State.App, options: ISimulationOptions) => {
 
 export const sync = (app: State.App, sample: Game.Sample) => {
   _.forEach(sample.balls, (value, id) => {
+    const position = Matter.Vector.create(value.x, value.y)
+    const velocity = Matter.Vector.create(value.vx, value.vy)
+
     const ball = id in app.game.balls
       ? app.game.balls[id]
-      : Game.spawnBall(app.game, _.toInteger(id))
+      : Game.spawnBall(app.game, {id: _.toInteger(id)})
 
     syncBall(ball, value.x, value.y, value.vx, value.vy)
   })

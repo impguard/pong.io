@@ -11,7 +11,7 @@ interface Config {
       delay: number,
       timeout: number,
     },
-  },  
+  },
   game: Game.Config,
 }
 
@@ -27,6 +27,14 @@ const config: Config = {
         max: 2,
       },
       radius: 5,
+    },
+    goal: {
+      width: 30,
+      height: 50,
+    },
+    player: {
+      width: 20,
+      height: 50,
     },
     numBalls: 10,
     numPlayers: 10,
