@@ -1,6 +1,7 @@
 import * as http from 'http'
 import * as Koa from 'koa'
 import * as Router from 'koa-router'
+import * as logger from 'koa-logger'
 import * as io from 'socket.io'
 import * as fs from 'fs'
 import * as _ from 'lodash'
@@ -37,7 +38,8 @@ router.get('/version', (ctx) => {
   ctx.body = fs.createReadStream('version.json')
 })
 
-koa.use(router.routes())
+koa.use(logger())
+   .use(router.routes())
    .use(router.allowedMethods())
 
 const httpServer = http.createServer(koa.callback())
