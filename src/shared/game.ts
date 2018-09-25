@@ -84,6 +84,7 @@ export interface Config {
       max: number,
     },
     radius: number,
+    sides: number,
   },
   delta: number,
 }
@@ -129,17 +130,20 @@ interface ISpawnBallOptions {
 }
 
 export const spawnBall = (state: State, options?: ISpawnBallOptions) => {
-  const ball = Matter.Bodies.circle(0, 0, state.config.ball.radius, {
-    restitution: 1,
-    friction: 0,
-    frictionAir: 0,
-    frictionStatic: 0,
-    collisionFilter: {
-      group: 0,
-      category: 1,
-      mask: ~0 << 1,
-    },
-    ...options
+  const ball = Matter.Bodies.polygon(
+    0, 0, 
+    state.config.ball.sides, 
+    state.config.ball.radius, {
+      restitution: 1,
+      friction: 0,
+      frictionAir: 0,
+      frictionStatic: 0,
+      collisionFilter: {
+        group: 0,
+        category: 1,
+        mask: ~0 << 1,
+      },
+      ...options
   })
 
   Matter.World.add(state.engine.world, ball)

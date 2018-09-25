@@ -23,10 +23,11 @@ const config: Config = {
     },
     ball: {
       speed: {
-        min: 2,
-        max: 6,
+        min: 1,
+        max: 3,
       },
       radius: 5,
+      sides: 50,
     },
     goal: {
       width: 30,
