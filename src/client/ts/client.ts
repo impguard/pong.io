@@ -4,6 +4,7 @@ import * as Simulation from './simulation'
 import * as Scene from './scene'
 import * as State from './state'
 import * as Game from '../../shared/game'
+import * as Message from '../../shared/message'
 
 
 const app: State.App = {
@@ -39,19 +40,21 @@ const setup = (socket: SocketIOClient.Socket) => {
     }
   })
 
-  socket.on('accepted', (config: Game.Config) => {
+  socket.on('accepted', (message: Message.Accept) => {
+    const { config, sample } = message
+
     app.accepted = true
 
     const element = $("#game").get(0)
 
-    Simulation.setup(app, {element, config})
+    Simulation.setup(app, {element, config, sample})
     Simulation.run(app)
 
     Scene.change(Scene.Name.Game)
   })
 
-  socket.on('gamestate', (sample: Game.Sample) => {
-    Simulation.sync(app, sample)
+  socket.on('gamestate', (message: Message.GameState) => {
+    Simulation.sync(app, message.sample)
   })
 }
 

@@ -23,8 +23,8 @@ const config: Config = {
     },
     ball: {
       speed: {
-        min: 1,
-        max: 2,
+        min: 2,
+        max: 6,
       },
       radius: 5,
     },

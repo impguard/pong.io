@@ -7,14 +7,29 @@ import * as Game from '../../shared/game'
 
 
 interface ISimulationOptions {
-  element: HTMLElement,
-  config: Game.Config,
+  element: HTMLElement
+  config: Game.Config
+  sample: Game.InitialSample
 }
 
 export const setup = (app: State.App, options: ISimulationOptions) => {
   app.game = Game.create(options.config)
 
-  Game.spawnPlayers(app.game)
+  _.forEach(options.sample.players, (player, id)  => {
+    Game.spawnPlayer(app.game, {
+      id: _.parseInt(id),
+      position: Matter.Vector.create(player.x, player.y),
+      angle: player.a,
+    })
+  })
+
+  _.forEach(options.sample.posts, (post, id) => {
+    Game.spawnPost(app.game, {
+      id: _.parseInt(id),
+      position: Matter.Vector.create(post.x, post.y),
+      angle: post.a,
+    })
+  })
 
   const render = Matter.Render.create({
     options: {
@@ -66,9 +81,12 @@ export const run = (app: State.App) => {
 
 export const stop = (app: State.App) => {
   Game.stop(app.game)
+  Matter.Render.stop(app.render)
 }
 
 export const destroy = (app: State.App) => {
   Game.destroy(app.game)
-  app.game = null
+  Matter.Render.stop(app.render)
+  $(app.render.canvas).remove()
+  app.render = app.game = null
 }

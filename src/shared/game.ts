@@ -17,12 +17,28 @@ export interface State {
       body: Matter.Body,
       basePosition: Matter.Vector,
       baseAngle: number,
-      leftPost: number,
-      rightPost: number,
+      goal?: [Matter.Vector, Matter.Vector]
     },
   },
   posts: {
     [id: number]: Matter.Body
+  }
+}
+
+export interface InitialSample {
+  players: {
+    [id: number]: {
+      x: number,
+      y: number,
+      a: number,
+    }
+  },
+  posts: {
+    [id: number]: {
+      x: number,
+      y: number,
+      a: number,
+    }
   }
 }
 
@@ -33,6 +49,12 @@ export interface Sample {
       y: number,
       vx: number,
       vy: number,
+    }
+  },
+  players: {
+    [id: number]: {
+      x: number,
+      y: number,
     }
   },
 }
@@ -87,11 +109,9 @@ export const create = (config: Config): State => {
   }
 }
 
-
 export const onBeforeTick = (state: State, callback: () => void) => {
   state.runner.beforeTick.push(callback)
 }
-
 
 export const resetBall = (state: State, ball: Matter.Body) => {
   const x = 2 * Math.random() - 1
@@ -128,52 +148,16 @@ export const spawnBall = (state: State, options?: ISpawnBallOptions) => {
   return ball
 }
 
-export const spawnPlayers = (state: State) => {
-  const numPlayers = state.config.numPlayers
-  const radius = state.config.arena.radius
-
-  const theta = 2 * Math.PI / numPlayers;
-
-  const posts = _.map(_.range(0, state.config.numPlayers), (number) => {
-    const angle = number * theta
-    const x = radius * Math.cos(angle)
-    const y = radius * Math.sin(angle)
-
-    const position = Matter.Vector.create(x, y)
-
-    const post = spawnPost(state, {position, angle})
-
-    return post
-  })
-  const createPlayer = (leftPost, rightPost) => {
-    const x = (leftPost.position.x + rightPost.position.x) / 2
-    const y = (leftPost.position.y + rightPost.position.y) / 2
-
-    const angle = Math.atan2(y, x)
-    const position = Matter.Vector.create(x, y)
-
-    const player = spawnPlayer(state, {position, angle})
-
-    return player
-  }
-
-  _.times(state.config.numPlayers - 1, (number) => {
-    const leftPost = posts[number]
-    const rightPost = posts[number + 1]
-
-    createPlayer(leftPost, rightPost)
-  })
-
-  createPlayer(posts[posts.length - 1], posts[0])
-}
-
 interface ISpawnPlayerOptions {
   id?: number
   position: Matter.Vector
   angle: number
+  goal?: [Matter.Vector, Matter.Vector]
 }
 
 export const spawnPlayer = (state: State, options: ISpawnPlayerOptions) => {
+  const bodyOptions = _.omit(options, 'goal')
+
   const player = Matter.Bodies.rectangle(0, 0, state.config.player.width, state.config.player.height, {
     isStatic: true,
     collisionFilter: {
@@ -181,10 +165,17 @@ export const spawnPlayer = (state: State, options: ISpawnPlayerOptions) => {
       category: 2,
       mask: ~0,
     },
-    ...options,
+    ...bodyOptions,
   })
 
   Matter.World.add(state.engine.world, player)
+  state.players[player.id] = {
+    baseAngle: options.angle,
+    basePosition: options.position,
+    body: player,
+    goal: options.goal,
+  }
+
   return player
 }
 

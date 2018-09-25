@@ -8,9 +8,46 @@ import config from './config'
 export const setup = (app: State.App) => {
   app.game =  Game.create(config.game)
 
+  // Spawn the balls into the game
   _.times(app.game.config.numBalls, () => {
     const ball = Game.spawnBall(app.game)
     Game.resetBall(app.game, ball)
+  })
+
+  const numPlayers = config.game.numPlayers
+  const radius = config.game.arena.radius
+
+  // Spawn each goal post
+  const theta = 2 * Math.PI / numPlayers;
+
+  const posts = _.map(_.range(0, numPlayers), (number) => {
+    const angle = number * theta
+    const x = radius * Math.cos(angle)
+    const y = radius * Math.sin(angle)
+
+    const position = Matter.Vector.create(x, y)
+
+    const post = Game.spawnPost(app.game, {position, angle})
+
+    return post
+  })
+
+  // Spawn every player
+  _.times(numPlayers, (number) => {
+    const leftPost = posts[number]
+    const rightPost = posts[(number + 1) % numPlayers]
+
+    const x = (leftPost.position.x + rightPost.position.x) / 2
+    const y = (leftPost.position.y + rightPost.position.y) / 2
+
+    const angle = Math.atan2(y, x)
+    const position = Matter.Vector.create(x, y)
+
+    Game.spawnPlayer(app.game, {
+      position, 
+      angle, 
+      goal: [leftPost.position, rightPost.position]
+    })
   })
 
   Game.onBeforeTick(app.game, () => tick(app))
@@ -26,7 +63,28 @@ export const sample = (app: State.App): Game.Sample => {
     vy: ball.velocity.y,
   }))
 
-  return {balls}
+  const players = _.mapValues(app.game.players, player => ({
+    x: player.body.position.x,
+    y: player.body.position.y
+  }))
+
+  return {balls, players}
+}
+
+export const sampleInitial = (app: State.App): Game.InitialSample => {
+  const posts = _.mapValues(app.game.posts, posts => ({
+    x: posts.position.x,
+    y: posts.position.y,
+    a: posts.angle,
+  }))
+
+  const players = _.mapValues(app.game.players, player => ({
+    x: player.body.position.x,
+    y: player.body.position.y,
+    a: player.body.angle,
+  }))
+
+  return {posts, players}
 }
 
 
@@ -37,6 +95,14 @@ export const tick = (app: State.App) => {
     if (distance > app.game.config.arena.radius) {
       Game.resetBall(app.game, ball)
     }
+
+    // This causes some strange behaviour so leaving it out for now
+    // if (ball.speed < app.game.config.ball.speed.min) {
+    //   const direction = Matter.Vector.normalise(ball.velocity)
+    //   const velocity = Matter.Vector.mult(direction, app.game.config.ball.speed.min)
+
+    //   Matter.Body.setVelocity(ball, velocity)
+    // }
   })
 }
 

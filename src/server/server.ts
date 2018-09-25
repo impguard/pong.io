@@ -7,6 +7,7 @@ import * as fs from 'fs'
 import * as _ from 'lodash'
 import * as State from './state'
 import * as Simulation from './simulation'
+import * as Message from '../shared/message'
 import config from './config'
 
 /****************************************
@@ -57,7 +58,11 @@ const create = () => {
   Simulation.setup(app)
   
   app.server.on('connection', socket => {
-    socket.emit('accepted', app.game.config)
+    const acceptMessage: Message.Accept = {
+      config: app.game.config,
+      sample: Simulation.sampleInitial(app)
+    }
+    socket.emit('accepted', acceptMessage)
     socket.join('players')
 
     add(app, socket)
@@ -84,7 +89,10 @@ httpServer.listen(80, () => {
   Simulation.run(app)
 
   setInterval(() => {
-    app.server.to('players').emit('gamestate', Simulation.sample(app))
+    const message: Message.GameState = {
+      sample: Simulation.sample(app)
+    }
 
+    app.server.to('players').emit('gamestate', message)
   }, config.app.network.delta)
 })
