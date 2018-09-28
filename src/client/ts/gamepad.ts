@@ -3,13 +3,17 @@ import * as _ from 'lodash'
 import * as Game from '../../shared/game'
 
 
-const input: Game.Input = {
+const keys = {
   left: 0,
   right: 0,
 }
 
 export const sample = (): Game.Input => {
-  return _.cloneDeep(input)
+  const input: Game.Input = {
+    horizontal: keys.right - keys.left
+  }
+
+  return input
 }
 
 $(window).keydown(event => {
@@ -17,10 +21,10 @@ $(window).keydown(event => {
 
   switch(keyCode) {
     case 39:
-      input.right = 1
+      keys.right = 1
       break
     case 37:
-      input.left = 1
+      keys.left = 1
       break
   }
 })
@@ -30,10 +34,10 @@ $(window).keyup(event => {
 
   switch(keyCode) {
     case 39:
-      input.right = 0
+      keys.right = 0
       break
     case 37:
-      input.left = 0
+      keys.left = 0
       break
   }
 })

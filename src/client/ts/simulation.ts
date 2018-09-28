@@ -4,6 +4,7 @@ import * as Matter from 'matter-js'
 import * as State from './state'
 import * as Gamepad from './gamepad'
 import * as Game from '../../shared/game'
+import * as Message from '../../shared/message'
 
 
 interface ISimulationOptions {
@@ -35,6 +36,9 @@ export const setup = (app: State.App, options: ISimulationOptions) => {
     options: {
       width: 800,
       height: 800,
+      wireframes: true,
+      // @ts-ignore
+      showBounds: true,
     },
     element: options.element,
     engine: app.game.engine,
@@ -60,22 +64,32 @@ export const sync = (app: State.App, sample: Game.Sample) => {
       ? app.game.balls[id]
       : Game.spawnBall(app.game, {id: _.toInteger(id)})
 
-    syncBall(ball, value.x, value.y, value.vx, value.vy)
+    Matter.Body.setPosition(ball, position)
+    Matter.Body.setVelocity(ball, velocity)
   })
-}
 
-const syncBall = (ball: Matter.Body, x, y, vx, vy) => {
-  Matter.Body.setPosition(ball, Matter.Vector.create(x, y))
-  Matter.Body.setVelocity(ball, Matter.Vector.create(vx, vy))
+  _.forEach(sample.players, (value, id) => {
+    const position = Matter.Vector.create(value.x, value.y)
+    const player = app.game.players[id]
+    Matter.Body.setPosition(player.body, position)
+  })
 }
 
 export const tick = (app: State.App) => {
   const input = Gamepad.sample()
+  const player = app.game.players[app.assignment]
+
+  Game.input(app.game, player, input)
+  Game.tick(app.game)
+
+  const message: Message.Input = {input}
+  app.socket.emit('input', message)
 }
 
 
 export const run = (app: State.App) => {
   Game.run(app.game)
+  app.render.context.scale(10, -1)
   Matter.Render.run(app.render)
 }
 

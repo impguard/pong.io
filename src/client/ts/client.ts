@@ -13,6 +13,7 @@ const app: State.App = {
   name: null,
   started: false,
   accepted: false,
+  assignment: null,
   game: null,
   render: null,
 }
@@ -41,9 +42,10 @@ const setup = (socket: SocketIOClient.Socket) => {
   })
 
   socket.on('accepted', (message: Message.Accept) => {
-    const { config, sample } = message
+    const { id, config, sample } = message
 
     app.accepted = true
+    app.assignment = id
 
     const element = $("#game").get(0)
 

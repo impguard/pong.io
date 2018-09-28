@@ -40,7 +40,7 @@ export const setup = (app: State.App) => {
     const x = (leftPost.position.x + rightPost.position.x) / 2
     const y = (leftPost.position.y + rightPost.position.y) / 2
 
-    const angle = Math.atan2(y, x)
+    const angle = Math.atan2(y, x) + Math.PI / 2
     const position = Matter.Vector.create(x, y)
 
     Game.spawnPlayer(app.game, {
@@ -95,15 +95,30 @@ export const tick = (app: State.App) => {
     if (distance > app.game.config.arena.radius) {
       Game.resetBall(app.game, ball)
     }
-
-    // This causes some strange behaviour so leaving it out for now
-    // if (ball.speed < app.game.config.ball.speed.min) {
-    //   const direction = Matter.Vector.normalise(ball.velocity)
-    //   const velocity = Matter.Vector.mult(direction, app.game.config.ball.speed.min)
-
-    //   Matter.Body.setVelocity(ball, velocity)
-    // }
   })
+
+  _.forEach(app.inputs, (input, id) => {
+    const player = app.game.players[id]
+    Game.input(app.game, player, input)
+  })
+
+  app.inputs = {}
+}
+
+
+export const assign = (app: State.App): number => {
+  const player = Game.assign(app.game)
+
+  if (player) {
+    return player.body.id
+  }
+
+  return null
+}
+
+export const input = (app: State.App, id: number, input: Game.Input) => {
+  const player = app.game.players[id]
+  Game.input(app.game, player, input)
 }
 
 
