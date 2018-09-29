@@ -98,9 +98,11 @@ export const tick = (app: State.App) => {
   })
 
   _.forEach(app.inputs, (input, id) => {
-    const player = app.game.players[id]
+    const player: Game.Player = app.game.players[id]
     Game.input(app.game, player, input)
   })
+
+  Game.tick(app.game)
 
   app.inputs = {}
 }
