@@ -1,6 +1,15 @@
 import * as Matter from 'matter-js';
 import * as _ from 'lodash'
 
+export interface Player {
+  body: Matter.Body
+  basePosition: Matter.Vector
+  baseAngle: number
+  up: Matter.Vector
+  right: Matter.Vector
+  assigned: boolean
+  goal?: [Matter.Vector, Matter.Vector]
+}
 
 export interface State {
   engine: Matter.Engine,
@@ -13,12 +22,7 @@ export interface State {
     [id: number]: Matter.Body
   },
   players: {
-    [id: number]: {
-      body: Matter.Body,
-      basePosition: Matter.Vector,
-      baseAngle: number,
-      goal?: [Matter.Vector, Matter.Vector]
-    },
+    [id: number]: Player
   },
   posts: {
     [id: number]: Matter.Body
@@ -60,8 +64,7 @@ export interface Sample {
 }
 
 export interface Input {
-  left: number,
-  right: number,
+  horizontal: number,
 }
 
 export interface Config {
@@ -70,13 +73,14 @@ export interface Config {
   arena: {
     radius: number,
   },
-  goal: {
+  post: {
     width: number,
     height: number,
   },
   player: {
     width: number,
     height: number,
+    speed: number,
   },
   ball: {
     speed: {
@@ -134,6 +138,7 @@ export const spawnBall = (state: State, options?: ISpawnBallOptions) => {
     0, 0, 
     state.config.ball.sides, 
     state.config.ball.radius, {
+      inertia: Infinity,
       restitution: 1,
       friction: 0,
       frictionAir: 0,
@@ -172,11 +177,17 @@ export const spawnPlayer = (state: State, options: ISpawnPlayerOptions) => {
     ...bodyOptions,
   })
 
+  const up = Matter.Vector.rotate(Matter.Vector.create(0, 1), options.angle)
+  const right = Matter.Vector.rotate(Matter.Vector.create(1, 0), options.angle)
+
   Matter.World.add(state.engine.world, player)
   state.players[player.id] = {
     baseAngle: options.angle,
     basePosition: options.position,
+    up, 
+    right,
     body: player,
+    assigned: false,
     goal: options.goal,
   }
 
@@ -190,7 +201,7 @@ interface ISpawnPostOptions {
 }
 
 export const spawnPost = (state: State, options: ISpawnPostOptions) =>  {
-  const post = Matter.Bodies.rectangle(0, 0, state.config.goal.width, state.config.goal.height, {
+  const post = Matter.Bodies.rectangle(0, 0, state.config.post.width, state.config.post.height, {
     isStatic: true,
     collisionFilter: {
       group: 0,
@@ -204,6 +215,35 @@ export const spawnPost = (state: State, options: ISpawnPostOptions) =>  {
   state.posts[post.id] = post
 
   return post
+}
+
+
+export const assign = (state: State) => {
+  const player = _.find(state.players, player => !player.assigned)
+
+  if (player) {
+    player.assigned = true
+  }
+
+  return player
+}
+
+
+export const input = (state: State, player: Player, input: Input) => {
+  const horizontal = Matter.Vector.mult(player.right, input.horizontal)
+  const velocity = Matter.Vector.mult(horizontal, state.config.player.speed)
+
+  Matter.Body.setVelocity(player.body, velocity)
+}
+
+
+export const tick = (state: State) => {
+  _.forEach(state.players, player => {
+    const dp = Matter.Vector.mult(player.body.velocity, state.config.delta)
+    const position = Matter.Vector.add(player.body.position, dp)
+
+    Matter.Body.setPosition(player.body, position)
+  })
 }
 
 

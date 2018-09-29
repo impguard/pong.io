@@ -29,13 +29,14 @@ const config: Config = {
       radius: 5,
       sides: 50,
     },
-    goal: {
-      width: 30,
-      height: 50,
+    post: {
+      width: 80,
+      height: 15,
     },
     player: {
-      width: 20,
-      height: 50,
+      width: 50,
+      height: 10,
+      speed: 0.15,
     },
     numBalls: 10,
     numPlayers: 10,

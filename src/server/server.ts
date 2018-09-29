@@ -51,6 +51,7 @@ const httpServer = http.createServer(koa.callback())
 
 const create = () => {
   const app: State.App = {
+    inputs: {},
     game: null,
     server: io(httpServer),
   }
@@ -58,22 +59,32 @@ const create = () => {
   Simulation.setup(app)
   
   app.server.on('connection', socket => {
-    const acceptMessage: Message.Accept = {
-      config: app.game.config,
-      sample: Simulation.sampleInitial(app)
-    }
-    socket.emit('accepted', acceptMessage)
-    socket.join('players')
-
     add(app, socket)
-
-    console.log('Accepted player!')
   })
 
   return app
 }
 
 const add = (app: State.App, socket: SocketIO.Socket) => {
+  const id = Simulation.assign(app)
+
+  if (!id) {
+    socket.emit('rejected')
+    socket.disconnect()
+    return
+  }
+
+  const acceptMessage: Message.Accept = {
+    id,
+    config: app.game.config,
+    sample: Simulation.sampleInitial(app)
+  }
+
+  socket.emit('accepted', acceptMessage)
+  socket.join('players')
+
+  console.log(`Accepted player. Assigned to ${id}`)
+
   socket.on('disconnect', () => {
     const remaining = _.size(app.server.of('players').sockets)
 
@@ -81,6 +92,10 @@ const add = (app: State.App, socket: SocketIO.Socket) => {
       console.log('No players remaining!')
     }
   })
+
+  socket.on('input', (message: Message.Input) => {
+    app.inputs[id] = message.input
+  }) 
 }
 
 httpServer.listen(80, () => {
