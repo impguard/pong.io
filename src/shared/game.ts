@@ -2,12 +2,16 @@ import * as Matter from 'matter-js';
 import * as _ from 'lodash'
 
 export interface Player {
-  body: Matter.Body
+  composite: Matter.Composite
   basePosition: Matter.Vector
   baseAngle: number
   up: Matter.Vector
   right: Matter.Vector
   assigned: boolean
+  paddleId: number
+  lflipperId: number
+  rflipperId: number
+  velocity: Matter.Vector
   goal?: [Matter.Vector, Matter.Vector]
 }
 
@@ -18,12 +22,18 @@ export interface State {
     id?: any,
     beforeTick: (() => void)[],
   },
+  players: {
+    [id: number]: Player
+  }
   balls: {
     [id: number]: Matter.Body
   },
-  players: {
-    [id: number]: Player
+  paddles: {
+    [id: number]: Matter.Body
   },
+  flippers: {
+    [id: number]: Matter.Body
+  }
   posts: {
     [id: number]: Matter.Body
   }
@@ -32,16 +42,19 @@ export interface State {
 export interface InitialSample {
   players: {
     [id: number]: {
-      x: number,
-      y: number,
-      a: number,
+      x: number
+      y: number
+      a: number
+      p: number
+      lf: number
+      rf: number
     }
   },
   posts: {
     [id: number]: {
-      x: number,
-      y: number,
-      a: number,
+      x: number
+      y: number
+      a: number
     }
   }
 }
@@ -49,18 +62,24 @@ export interface InitialSample {
 export interface Sample {
   balls: {
     [id: number]: {
-      x: number,
-      y: number,
-      vx: number,
-      vy: number,
+      x: number
+      y: number
+      vx: number
+      vy: number
     }
-  },
+  }
   players: {
     [id: number]: {
-      x: number,
-      y: number,
+      vx: number
+      vy: number
+      px: number
+      py: number
+      lfx: number
+      lfy: number
+      rfx: number
+      rfy: number
     }
-  },
+  }
 }
 
 export interface Input {
@@ -107,6 +126,8 @@ export const create = (config: Config): State => {
     engine,
     balls: {},
     players: {},
+    paddles: {},
+    flippers: {},
     posts: {},
     runner: {
       beforeTick: []
@@ -159,22 +180,35 @@ export const spawnBall = (state: State, options?: ISpawnBallOptions) => {
 
 interface ISpawnPlayerOptions {
   id?: number
+  paddleId?: number
+  lflipperId?: number
+  rflipperId?: number
   position: Matter.Vector
   angle: number
   goal?: [Matter.Vector, Matter.Vector]
 }
 
 export const spawnPlayer = (state: State, options: ISpawnPlayerOptions) => {
-  const bodyOptions = _.omit(options, 'goal')
+  const baseOptions = _.pick(options, 'position', 'angle')
 
-  const player = Matter.Bodies.rectangle(0, 0, state.config.player.width, state.config.player.height, {
-    isStatic: true,
-    collisionFilter: {
-      group: 0,
-      category: 2,
-      mask: ~0,
-    },
-    ...bodyOptions,
+  const paddle = spawnPaddle(state, {
+    ...(options.paddleId && { id: options.paddleId }),
+    ...baseOptions,
+  })
+
+  const lflipper = spawnFlipper(state, {
+    ...(options.lflipperId && { id: options.lflipperId }),
+    ...baseOptions,
+  })
+
+  const rflipper = spawnFlipper(state, {
+    ...(options.rflipperId && { id: options.rflipperId }),
+    ...baseOptions,
+  })
+
+  const player = Matter.Composite.create({
+    ...(options.id && { id: options.id }),
+    bodies: [paddle, lflipper, rflipper],
   })
 
   const up = Matter.Vector.rotate(Matter.Vector.create(0, 1), options.angle)
@@ -182,16 +216,62 @@ export const spawnPlayer = (state: State, options: ISpawnPlayerOptions) => {
 
   Matter.World.add(state.engine.world, player)
   state.players[player.id] = {
+    composite: player,
+    velocity: Matter.Vector.create(0, 0),
     baseAngle: options.angle,
     basePosition: options.position,
-    up, 
+    up,
     right,
-    body: player,
     assigned: false,
     goal: options.goal,
+    paddleId: paddle.id,
+    lflipperId: lflipper.id,
+    rflipperId: rflipper.id,
   }
 
   return player
+}
+
+interface ISpawnPaddleOptions {
+  id?: number
+  position: Matter.Vector
+  angle: number
+}
+
+const spawnPaddle = (state: State, options: ISpawnPaddleOptions) => {
+  const paddle = Matter.Bodies.rectangle(0, 0, state.config.player.width, state.config.player.height, {
+    isStatic: true,
+    collisionFilter: {
+      group: 0,
+      category: 2,
+      mask: ~0,
+    },
+    ...options,
+  })
+
+  state.paddles[paddle.id] = paddle
+  return paddle
+}
+
+interface ISpawnFlipperOptions {
+  id?: number
+  position: Matter.Vector
+  angle: number
+}
+
+const spawnFlipper = (state: State, options: ISpawnPaddleOptions) => {
+  const flipper = Matter.Bodies.rectangle(0, 0, state.config.player.width, state.config.player.height, {
+    isStatic: true,
+    collisionFilter: {
+      group: 0,
+      category: 2,
+      mask: ~0,
+    },
+    ...options,
+  })
+
+  state.flippers[flipper.id] = flipper
+  return flipper
 }
 
 interface ISpawnPostOptions {
@@ -233,16 +313,26 @@ export const input = (state: State, player: Player, input: Input) => {
   const horizontal = Matter.Vector.mult(player.right, input.horizontal)
   const velocity = Matter.Vector.mult(horizontal, state.config.player.speed)
 
-  Matter.Body.setVelocity(player.body, velocity)
+  setPlayerVelocity(state, player, velocity)
+}
+
+
+export const setPlayerVelocity = (state: State, player: Player, velocity: Matter.Vector) => {
+  const paddle = state.paddles[player.paddleId]
+  const lflipper = state.flippers[player.lflipperId]
+  const rflipper = state.flippers[player.rflipperId]
+
+  player.velocity = velocity
+  Matter.Body.setVelocity(paddle, velocity)
+  Matter.Body.setVelocity(rflipper, velocity)
+  Matter.Body.setVelocity(lflipper, velocity)
 }
 
 
 export const tick = (state: State) => {
   _.forEach(state.players, player => {
-    const dp = Matter.Vector.mult(player.body.velocity, state.config.delta)
-    const position = Matter.Vector.add(player.body.position, dp)
-
-    Matter.Body.setPosition(player.body, position)
+    const delta = Matter.Vector.mult(player.velocity, state.config.delta)
+    Matter.Composite.translate(player.composite, delta)
   })
 }
 

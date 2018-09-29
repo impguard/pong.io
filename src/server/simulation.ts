@@ -63,10 +63,22 @@ export const sample = (app: State.App): Game.Sample => {
     vy: ball.velocity.y,
   }))
 
-  const players = _.mapValues(app.game.players, player => ({
-    x: player.body.position.x,
-    y: player.body.position.y
-  }))
+  const players = _.mapValues(app.game.players, player => {
+    const paddle = app.game.paddles[player.paddleId]
+    const lflipper = app.game.flippers[player.lflipperId]
+    const rflipper = app.game.flippers[player.rflipperId]
+
+    return {
+      vx: player.velocity.x,
+      vy: player.velocity.y,
+      px: paddle.position.x,
+      py: paddle.position.y,
+      lfx: lflipper.position.x,
+      lfy: lflipper.position.y,
+      rfx: rflipper.position.x,
+      rfy: rflipper.position.y,
+    }
+  })
 
   return {balls, players}
 }
@@ -79,9 +91,12 @@ export const sampleInitial = (app: State.App): Game.InitialSample => {
   }))
 
   const players = _.mapValues(app.game.players, player => ({
-    x: player.body.position.x,
-    y: player.body.position.y,
-    a: player.body.angle,
+    x: player.basePosition.x,
+    y: player.basePosition.y,
+    a: player.baseAngle,
+    p: player.paddleId,
+    lf: player.lflipperId,
+    rf: player.rflipperId,
   }))
 
   return {posts, players}
@@ -110,13 +125,10 @@ export const tick = (app: State.App) => {
 
 export const assign = (app: State.App): number => {
   const player = Game.assign(app.game)
-
-  if (player) {
-    return player.body.id
-  }
-
-  return null
+  const id = player ? player.composite.id : null
+  return id
 }
+
 
 export const input = (app: State.App, id: number, input: Game.Input) => {
   const player = app.game.players[id]

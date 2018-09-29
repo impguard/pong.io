@@ -5,6 +5,7 @@ import * as State from './state'
 import * as Gamepad from './gamepad'
 import * as Game from '../../shared/game'
 import * as Message from '../../shared/message'
+import { Vector } from 'matter-js';
 
 
 interface ISimulationOptions {
@@ -21,6 +22,9 @@ export const setup = (app: State.App, options: ISimulationOptions) => {
       id: _.parseInt(id),
       position: Matter.Vector.create(player.x, player.y),
       angle: player.a,
+      paddleId: player.p,
+      lflipperId: player.lf,
+      rflipperId: player.rf,
     })
   })
 
@@ -69,9 +73,15 @@ export const sync = (app: State.App, sample: Game.Sample) => {
   })
 
   _.forEach(sample.players, (value, id) => {
-    const position = Matter.Vector.create(value.x, value.y)
     const player = app.game.players[id]
-    Matter.Body.setPosition(player.body, position)
+    const paddle = app.game.paddles[player.paddleId]
+    const lflipper  = app.game.paddles[player.lflipperId]
+    const rflipper = app.game.paddles[player.rflipperId]
+
+    Game.setPlayerVelocity(app.game, player, Matter.Vector.create(value.vx, value.vy))
+    Matter.Body.setPosition(paddle, Matter.Vector.create(value.px, value.py))
+    Matter.Body.setPosition(lflipper, Matter.Vector.create(value.rfx, value.rfy))
+    Matter.Body.setPosition(rflipper, Matter.Vector.create(value.lfx, value.lfy))
   })
 }
 
