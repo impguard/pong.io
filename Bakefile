@@ -149,8 +149,8 @@ function run {
 }
 
 
-bake_task run:live "Runs the game with live reloading."
-function run:live {
+bake_task run.live "Runs the game with live reloading."
+function run.live {
   local id
 
   if [ ! -d node_modules ]; then
@@ -265,10 +265,10 @@ function deploy {
 }
 
 
-bake_task server:start "Starts a game server."
-function server:start {
+bake_task server.start "Starts a game server."
+function server.start {
   if [ "$#" -lt 1 ]; then
-    bake_echo_red "usage: bake server:start TASKDEFARN"
+    bake_echo_red "usage: bake server.start TASKDEFARN"
     return 1
   fi
 
@@ -282,16 +282,31 @@ function server:start {
 }
 
 
-bake_task server:deploys "Lists the deploys that can be used to start a server"
-function server:deploys {
-  aws ecs list-task-definitions --family-prefix pong-dev-server | jq '.taskDefinitionArns'
+bake_task server.definitions "Lists the task definitions that can be used to start a server"
+function server.definitions {
+  aws ecs list-task-definitions --family-prefix pong-dev-server \
+    | jq -r '.taskDefinitionArns[]' \
+    | tail -10
 }
 
 
-bake_task server:stop "Stops a game server."
-function server:stop {
+bake_task server.definition "Describe a specific task definition"
+function server.definition {
   if [ "$#" -lt 1 ]; then
-    bake_echo_red "usage: bake server:stop TASKARN"
+    bake_echo_red "usage: bake server.definition TASKDEF"
+    return 1
+  fi
+
+  aws ecs describe-task-definition --task-definition "$1" \
+    | jq '.taskDefinition.containerDefinitions[0]' \
+    | jq -r '.image'
+}
+
+
+bake_task server.stop "Stops a game server."
+function server.stop {
+  if [ "$#" -lt 1 ]; then
+    bake_echo_red "usage: bake server.stop TASKARN"
     return 1
   fi
 
@@ -300,21 +315,21 @@ function server:stop {
 }
 
 
-bake_task server:ls "Lists all running game servers."
-function server:ls {
+bake_task server.ls "Lists all running game servers."
+function server.ls {
   local arns
   arns=$(aws ecs list-tasks --cluster "pong-sandbox" | jq -r '.taskArns | join(" ")')
 
   for arn in $arns; do
-    server:info "$arn"
+    server.info "$arn"
   done
 }
 
 
-bake_task server:info "Shows the information for a game server task."
-function server:info {
+bake_task server.info "Shows the information for a game server task."
+function server.info {
   if [ "$#" -lt 1 ]; then
-    bake_echo_red "usage: bake server:info TASKARN"
+    bake_echo_red "usage: bake server.info TASKARN"
     return 1
   fi
 
