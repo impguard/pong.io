@@ -57,7 +57,7 @@ const create = () => {
   }
 
   Simulation.setup(app)
-  
+
   app.server.on('connection', socket => {
     add(app, socket)
   })
@@ -69,7 +69,10 @@ const add = (app: State.App, socket: SocketIO.Socket) => {
   const id = Simulation.assign(app)
 
   if (!id) {
-    socket.emit('rejected')
+    socket.emit('rejected', {
+      code: Message.Code.MATCHFULL,
+      reason: "match is full"
+    })
     socket.disconnect()
     return
   }
@@ -95,7 +98,7 @@ const add = (app: State.App, socket: SocketIO.Socket) => {
 
   socket.on('input', (message: Message.Input) => {
     app.inputs[id] = message.input
-  }) 
+  })
 }
 
 httpServer.listen(80, () => {

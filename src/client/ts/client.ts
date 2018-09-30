@@ -35,9 +35,19 @@ const connect = (app: State.App, name, host, port) => {
 const setup = (socket: SocketIOClient.Socket) => {
   socket.emit('join', name)
 
+  socket.on('rejected', (message: Message.Reject) => {
+    if (message.code == Message.Code.MATCHFULL) {
+      alert(message.reason)
+    }
+  })
+
   socket.on('disconnect', (reason) => {
-   if (reason === 'io server disconnect') {
+    if (reason === 'io server disconnect') {
+      console.log('disconnected by server')
       reset(app)
+    }
+    else {
+      console.log('disconnected...attempting to reconnect')
     }
   })
 

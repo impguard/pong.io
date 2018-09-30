@@ -102,12 +102,9 @@ export const run = (app: State.App) => {
   Matter.Render.run(app.render)
 }
 
-export const stop = (app: State.App) => {
-  Game.stop(app.game)
-  Matter.Render.stop(app.render)
-}
 
 export const destroy = (app: State.App) => {
+  Game.stop(app.game)
   Game.destroy(app.game)
   Matter.Render.stop(app.render)
   $(app.render.canvas).remove()
