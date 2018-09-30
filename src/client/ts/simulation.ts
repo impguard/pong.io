@@ -5,7 +5,6 @@ import * as State from './state'
 import * as Gamepad from './gamepad'
 import * as Game from '../../shared/game'
 import * as Message from '../../shared/message'
-import { Vector } from 'matter-js';
 
 
 interface ISimulationOptions {
@@ -73,15 +72,16 @@ export const sync = (app: State.App, sample: Game.Sample) => {
   })
 
   _.forEach(sample.players, (value, id) => {
-    const player = app.game.players[id]
-    const paddle = app.game.paddles[player.paddleId]
-    const lflipper  = app.game.paddles[player.lflipperId]
-    const rflipper = app.game.paddles[player.rflipperId]
+    const player: Game.Player = app.game.players[id]
 
     Game.setPlayerVelocity(app.game, player, Matter.Vector.create(value.vx, value.vy))
-    Matter.Body.setPosition(paddle, Matter.Vector.create(value.px, value.py))
-    Matter.Body.setPosition(lflipper, Matter.Vector.create(value.rfx, value.rfy))
-    Matter.Body.setPosition(rflipper, Matter.Vector.create(value.lfx, value.lfy))
+    Matter.Body.setPosition(player.paddle, Matter.Vector.create(value.px, value.py))
+    Matter.Body.setPosition(player.lflipper.body, Matter.Vector.create(value.lfx, value.lfy))
+    Matter.Body.setPosition(player.rflipper.body, Matter.Vector.create(value.rfx, value.rfy))
+    Matter.Body.setAngle(player.lflipper.body, value.lfa)
+    Matter.Body.setAngle(player.rflipper.body, value.rfa)
+    player.lflipper.state = value.lfs
+    player.rflipper.state = value.rfs
   })
 }
 

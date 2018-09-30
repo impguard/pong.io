@@ -1,3 +1,6 @@
+import * as Matter from 'matter-js'
+
+
 export interface Player {
   composite: Matter.Composite
   basePosition: Matter.Vector
@@ -5,11 +8,22 @@ export interface Player {
   up: Matter.Vector
   right: Matter.Vector
   assigned: boolean
-  paddleId: number
-  lflipperId: number
-  rflipperId: number
+  paddle: Matter.Body
+  lflipper: Flipper
+  rflipper: Flipper
   velocity: Matter.Vector
   goal?: [Matter.Vector, Matter.Vector]
+}
+
+export enum FlipperType { RIGHT, LEFT }
+
+export enum FlipperState { CHARGE, SWING, RESET, READY }
+
+export interface Flipper {
+  body: Matter.Body
+  type: FlipperType
+  state: FlipperState
+  baseAngle: number
 }
 
 export interface State {
@@ -29,7 +43,7 @@ export interface State {
     [id: number]: Matter.Body
   },
   flippers: {
-    [id: number]: Matter.Body
+    [id: number]: Flipper
   }
   posts: {
     [id: number]: Matter.Body
@@ -73,38 +87,62 @@ export interface Sample {
       py: number
       lfx: number
       lfy: number
+      lfa: number
+      lfs: FlipperState
       rfx: number
       rfy: number
+      rfa: number
+      rfs: FlipperState
     }
   }
 }
 
 export interface Input {
-  horizontal: number,
+  horizontal: number
+  lswing: boolean
+  rswing: boolean
 }
 
 export interface Config {
-  numPlayers: number,
-  numBalls: number,
+  numPlayers: number
+  numBalls: number
   arena: {
-    radius: number,
+    radius: number
   },
   post: {
-    width: number,
-    height: number,
-  },
+    width: number
+    height: number
+  }
   player: {
-    width: number,
-    height: number,
-    speed: number,
-  },
+    speed: number
+  }
+  paddle: {
+    width: number
+    height: number
+  }
+  flipper: {
+    width: number
+    height: number
+    spacing: number
+    charge: {
+      speed: number
+      angle: number
+    }
+    swing: {
+      speed: number
+      angle: number
+    }
+    reset: {
+      speed: number
+    }
+  }
   ball: {
     speed: {
-      min: number,
-      max: number,
-    },
-    radius: number,
-    sides: number,
-  },
-  delta: number,
+      min: number
+      max: number
+    }
+    radius: number
+    sides: number
+  }
+  delta: number
 }

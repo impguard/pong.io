@@ -44,8 +44,8 @@ export const setup = (app: State.App) => {
     const position = Matter.Vector.create(x, y)
 
     Game.spawnPlayer(app.game, {
-      position, 
-      angle, 
+      position,
+      angle,
       goal: [leftPost.position, rightPost.position]
     })
   })
@@ -64,19 +64,19 @@ export const sample = (app: State.App): Game.Sample => {
   }))
 
   const players = _.mapValues(app.game.players, player => {
-    const paddle = app.game.paddles[player.paddleId]
-    const lflipper = app.game.flippers[player.lflipperId]
-    const rflipper = app.game.flippers[player.rflipperId]
-
     return {
       vx: player.velocity.x,
       vy: player.velocity.y,
-      px: paddle.position.x,
-      py: paddle.position.y,
-      lfx: lflipper.position.x,
-      lfy: lflipper.position.y,
-      rfx: rflipper.position.x,
-      rfy: rflipper.position.y,
+      px: player.paddle.position.x,
+      py: player.paddle.position.y,
+      lfa: player.lflipper.body.angle,
+      lfx: player.lflipper.body.position.x,
+      lfy: player.lflipper.body.position.y,
+      lfs: player.lflipper.state,
+      rfa: player.rflipper.body.angle,
+      rfx: player.rflipper.body.position.x,
+      rfy: player.rflipper.body.position.y,
+      rfs: player.rflipper.state,
     }
   })
 
@@ -94,9 +94,9 @@ export const sampleInitial = (app: State.App): Game.InitialSample => {
     x: player.basePosition.x,
     y: player.basePosition.y,
     a: player.baseAngle,
-    p: player.paddleId,
-    lf: player.lflipperId,
-    rf: player.rflipperId,
+    p: player.paddle.id,
+    lf: player.lflipper.body.id,
+    rf: player.rflipper.body.id,
   }))
 
   return {posts, players}
