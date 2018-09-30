@@ -21,6 +21,9 @@ export const setup = (app: State.App, options: ISimulationOptions) => {
       id: _.parseInt(id),
       position: Matter.Vector.create(player.x, player.y),
       angle: player.a,
+      paddleId: player.p,
+      lflipperId: player.lf,
+      rflipperId: player.rf,
     })
   })
 
@@ -69,9 +72,16 @@ export const sync = (app: State.App, sample: Game.Sample) => {
   })
 
   _.forEach(sample.players, (value, id) => {
-    const position = Matter.Vector.create(value.x, value.y)
-    const player = app.game.players[id]
-    Matter.Body.setPosition(player.body, position)
+    const player: Game.Player = app.game.players[id]
+
+    Game.setPlayerVelocity(app.game, player, Matter.Vector.create(value.vx, value.vy))
+    Matter.Body.setPosition(player.paddle, Matter.Vector.create(value.px, value.py))
+    Matter.Body.setPosition(player.lflipper.body, Matter.Vector.create(value.lfx, value.lfy))
+    Matter.Body.setPosition(player.rflipper.body, Matter.Vector.create(value.rfx, value.rfy))
+    Matter.Body.setAngle(player.lflipper.body, value.lfa)
+    Matter.Body.setAngle(player.rflipper.body, value.rfa)
+    player.lflipper.state = value.lfs
+    player.rflipper.state = value.rfs
   })
 }
 
@@ -80,7 +90,6 @@ export const tick = (app: State.App) => {
   const player = app.game.players[app.assignment]
 
   Game.input(app.game, player, input)
-  Game.tick(app.game)
 
   const message: Message.Input = {input}
   app.socket.emit('input', message)

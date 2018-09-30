@@ -44,8 +44,8 @@ export const setup = (app: State.App) => {
     const position = Matter.Vector.create(x, y)
 
     Game.spawnPlayer(app.game, {
-      position, 
-      angle, 
+      position,
+      angle,
       goal: [leftPost.position, rightPost.position]
     })
   })
@@ -63,10 +63,22 @@ export const sample = (app: State.App): Game.Sample => {
     vy: ball.velocity.y,
   }))
 
-  const players = _.mapValues(app.game.players, player => ({
-    x: player.body.position.x,
-    y: player.body.position.y
-  }))
+  const players = _.mapValues(app.game.players, player => {
+    return {
+      vx: player.velocity.x,
+      vy: player.velocity.y,
+      px: player.paddle.position.x,
+      py: player.paddle.position.y,
+      lfa: player.lflipper.body.angle,
+      lfx: player.lflipper.body.position.x,
+      lfy: player.lflipper.body.position.y,
+      lfs: player.lflipper.state,
+      rfa: player.rflipper.body.angle,
+      rfx: player.rflipper.body.position.x,
+      rfy: player.rflipper.body.position.y,
+      rfs: player.rflipper.state,
+    }
+  })
 
   return {balls, players}
 }
@@ -79,9 +91,12 @@ export const sampleInitial = (app: State.App): Game.InitialSample => {
   }))
 
   const players = _.mapValues(app.game.players, player => ({
-    x: player.body.position.x,
-    y: player.body.position.y,
-    a: player.body.angle,
+    x: player.basePosition.x,
+    y: player.basePosition.y,
+    a: player.baseAngle,
+    p: player.paddle.id,
+    lf: player.lflipper.body.id,
+    rf: player.rflipper.body.id,
   }))
 
   return {posts, players}
@@ -102,21 +117,16 @@ export const tick = (app: State.App) => {
     Game.input(app.game, player, input)
   })
 
-  Game.tick(app.game)
-
   app.inputs = {}
 }
 
 
 export const assign = (app: State.App): number => {
   const player = Game.assign(app.game)
-
-  if (player) {
-    return player.body.id
-  }
-
-  return null
+  const id = player ? player.composite.id : null
+  return id
 }
+
 
 export const input = (app: State.App, id: number, input: Game.Input) => {
   const player = app.game.players[id]

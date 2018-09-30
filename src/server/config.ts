@@ -19,7 +19,7 @@ interface Config {
 const config: Config = {
   game: {
     arena: {
-      radius: 300
+      radius: 300,
     },
     ball: {
       speed: {
@@ -34,9 +34,27 @@ const config: Config = {
       height: 15,
     },
     player: {
-      width: 50,
-      height: 10,
       speed: 0.15,
+    },
+    paddle: {
+      width: 15,
+      height: 10,
+    },
+    flipper: {
+      width: 30,
+      height: 5,
+      spacing: 4,
+      charge: {
+        speed: 0.3,
+        angle: -45,
+      },
+      swing: {
+        speed: 0.6,
+        angle: 45,
+      },
+      reset: {
+        speed: 0.7,
+      },
     },
     numBalls: 10,
     numPlayers: 10,
