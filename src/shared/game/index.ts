@@ -58,14 +58,6 @@ export const destroy = (state: Interface.State) => {
  * Lifecycle Helpers
  ****************************************/
 
-export const tick = (state: Interface.State) => {
-  _.forEach(state.players, player => {
-    const delta = Matter.Vector.mult(player.velocity, state.config.delta)
-    Matter.Composite.translate(player.composite, delta)
-  })
-}
-
-
 export const assign = (state: Interface.State) => {
   const player = _.find(state.players, player => !player.assigned)
 

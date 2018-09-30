@@ -24,6 +24,12 @@ $(window).keydown(event => {
   const { keyCode } = event
 
   switch(keyCode) {
+    case 68:
+      keys.right = 1
+      break
+    case 65:
+      keys.left = 1
+      break
     case 39:
       keys.right = 1
       break
@@ -43,6 +49,12 @@ $(window).keyup(event => {
   const { keyCode } = event
 
   switch(keyCode) {
+    case 68:
+      keys.right = 0
+      break
+    case 65:
+      keys.left = 0
+      break
     case 39:
       keys.right = 0
       break

@@ -49,11 +49,11 @@ const config: Config = {
         angle: -45,
       },
       swing: {
-        speed: 0.3,
+        speed: 0.6,
         angle: 45,
       },
       reset: {
-        speed: 0.5,
+        speed: 0.7,
       },
     },
     numBalls: 10,

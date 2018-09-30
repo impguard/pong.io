@@ -117,8 +117,6 @@ export const tick = (app: State.App) => {
     Game.input(app.game, player, input)
   })
 
-  Game.tick(app.game)
-
   app.inputs = {}
 }
 

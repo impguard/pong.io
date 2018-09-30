@@ -19,6 +19,9 @@ const handleVelocity = (state, player, horizontal: number) => {
   const velocity = Matter.Vector.mult(direction, state.config.player.speed)
 
   Logic.setPlayerVelocity(state, player, velocity)
+
+  const delta = Matter.Vector.mult(velocity, state.config.delta)
+  Matter.Composite.translate(player.composite, delta)
 }
 
 const handleFlipper = (state, flipper, shouldSwing: boolean) => {
@@ -33,15 +36,25 @@ const handleFlipper = (state, flipper, shouldSwing: boolean) => {
 
   switch (flipper.state) {
     case CHARGE:
-      charge(state, flipper)
+      handleAngularVelocity(state, flipper, charge(state, flipper))
       break
     case SWING:
-      swing(state, flipper)
+      handleAngularVelocity(state, flipper, swing(state, flipper))
       break
     case RESET:
-      reset(state, flipper)
+      handleAngularVelocity(state, flipper, reset(state, flipper))
       break
   }
+}
+
+const handleAngularVelocity = (state, flipper, angle) => {
+  const nextAngle = toWorldAngle(flipper, angle)
+  const nextDelta = nextAngle - flipper.body.angle
+
+  Logic.rotateFlipper(state, flipper, nextDelta)
+
+  const velocity = nextDelta / state.config.delta
+  Matter.Body.setAngularVelocity(flipper.body, velocity)
 }
 
 const RAD_TO_DEG = 180 / Math.PI
@@ -71,9 +84,7 @@ const charge = (state: Interface.State, flipper: Interface.Flipper) => {
   const basisAngle = angle - delta
   const clampAngle = _.clamp(basisAngle, state.config.flipper.charge.angle, 0)
 
-  const nextAngle = toWorldAngle(flipper, clampAngle)
-  const nextDelta = nextAngle - flipper.body.angle
-  Logic.rotateFlipper(state, flipper, nextDelta)
+  return clampAngle
 }
 
 const swing = (state: Interface.State, flipper: Interface.Flipper) => {
@@ -92,11 +103,7 @@ const swing = (state: Interface.State, flipper: Interface.Flipper) => {
     flipper.state = RESET
   }
 
-  const nextAngle = toWorldAngle(flipper, clampAngle)
-  const nextDelta = nextAngle - flipper.body.angle
-
-
-  Logic.rotateFlipper(state, flipper, nextDelta)
+  return clampAngle
 }
 
 const reset = (state, flipper) => {
@@ -110,7 +117,5 @@ const reset = (state, flipper) => {
     flipper.state = READY
   }
 
-  const nextAngle = toWorldAngle(flipper, clampAngle)
-  const nextDelta = nextAngle - flipper.body.angle
-  Logic.rotateFlipper(state, flipper, nextDelta)
+  return clampAngle
 }

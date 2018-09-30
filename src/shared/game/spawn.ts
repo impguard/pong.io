@@ -141,6 +141,7 @@ const spawnFlipper = (state: State, options: ISpawnFlipperOptions) => {
     state.config.flipper.width,
     state.config.flipper.height,
     {
+      mass: 1000,
       isStatic: true,
       collisionFilter: {
         group: 0,

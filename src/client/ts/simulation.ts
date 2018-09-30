@@ -90,7 +90,6 @@ export const tick = (app: State.App) => {
   const player = app.game.players[app.assignment]
 
   Game.input(app.game, player, input)
-  Game.tick(app.game)
 
   const message: Message.Input = {input}
   app.socket.emit('input', message)
