@@ -35,9 +35,19 @@ const connect = (app: State.App, name, host, port) => {
 const setup = (socket: SocketIOClient.Socket) => {
   socket.emit('join', name)
 
+  socket.on('rejected', (message: Message.Reject) => {
+    if (message.code == Message.ErrorCode.MATCHFULL) {
+      alert("match is full")
+    }
+  })
+
   socket.on('disconnect', (reason) => {
    if (reason === 'io server disconnect') {
+      console.log('disconnected by server')
       reset(app)
+    }
+    else {
+      console.log('disconnected...attempting to reconnect')
     }
   })
 
@@ -58,6 +68,15 @@ const setup = (socket: SocketIOClient.Socket) => {
   socket.on('gamestate', (message: Message.GameState) => {
     Simulation.sync(app, message.sample)
   })
+
+  socket.on('goal', (message: Message.Goal) => {
+    const id = message.id
+    const health = message.health
+
+    app.game.players[id].health = health
+    console.log('Goal on Player ', id)
+  })
+
 }
 
 const reset = (app: State.App) => {

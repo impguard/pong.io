@@ -57,7 +57,7 @@ const create = () => {
   }
 
   Simulation.setup(app)
-  
+
   app.server.on('connection', socket => {
     add(app, socket)
   })
@@ -69,7 +69,11 @@ const add = (app: State.App, socket: SocketIO.Socket) => {
   const id = Simulation.assign(app)
 
   if (!id) {
-    socket.emit('rejected')
+    const rejectMessage: Message.Reject = {
+      code: Message.ErrorCode.MATCHFULL,
+    }
+
+    socket.emit('rejected', rejectMessage)
     socket.disconnect()
     return
   }
@@ -95,7 +99,7 @@ const add = (app: State.App, socket: SocketIO.Socket) => {
 
   socket.on('input', (message: Message.Input) => {
     app.inputs[id] = message.input
-  }) 
+  })
 }
 
 httpServer.listen(80, () => {
