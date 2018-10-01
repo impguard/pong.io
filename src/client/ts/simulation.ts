@@ -106,7 +106,6 @@ export const tick = (app: State.App) => {
 
 export const run = (app: State.App) => {
   Game.run(app.game)
-  app.render.context.scale(10, -1)
   Matter.Render.run(app.render)
 }
 
