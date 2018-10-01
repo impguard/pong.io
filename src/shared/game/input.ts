@@ -15,8 +15,8 @@ type Velocities = {linear: Matter.Vector, angular: number}
 export const input = (state: State, player: Player, input: Input) => {
   const velocity = solvePlayer(state, player, input.horizontal)
 
-  const lvelocities: Velocities = solveFlipper(state, player.lflipper, input.lswing)
-  const rvelocities: Velocities = solveFlipper(state, player.rflipper, input.rswing)
+  const lvelocities = solveFlipper(state, player.lflipper, input.lswing)
+  const rvelocities = solveFlipper(state, player.rflipper, input.rswing)
 
   resolvePaddleVelocity(player.paddle, velocity)
   resolveFlipperVelocity(player.lflipper, velocity, lvelocities)
