@@ -104,21 +104,21 @@ export const tick = (app: State.App) => {
   app.socket.emit('input', message)
 }
 
-
 export const run = (app: State.App) => {
   Game.run(app.game)
   app.render.context.scale(10, -1)
   Matter.Render.run(app.render)
 }
 
-export const stop = (app: State.App) => {
-  Game.stop(app.game)
-  Matter.Render.stop(app.render)
-}
 
 export const destroy = (app: State.App) => {
+  Game.stop(app.game)
   Game.destroy(app.game)
   Matter.Render.stop(app.render)
   $(app.render.canvas).remove()
   app.render = app.game = null
+}
+
+export const health = (app: State.App, playerId: number, health: number) => {
+  app.game.players[playerId].health = health
 }

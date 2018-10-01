@@ -29,7 +29,7 @@ export const create = (config: Config): State => {
     flippers: {},
     posts: {},
     runner: {
-      beforeTick: []
+      beforeTick: [],
     }
   }
 }

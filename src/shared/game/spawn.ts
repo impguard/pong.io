@@ -95,6 +95,7 @@ export const spawnPlayer = (state: State, options: ISpawnPlayerOptions) => {
     paddle,
     lflipper,
     rflipper,
+    health: state.config.player.health,
   }
 
   return player

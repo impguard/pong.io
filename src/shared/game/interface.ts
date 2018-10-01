@@ -12,6 +12,7 @@ export interface Player {
   lflipper: Flipper
   rflipper: Flipper
   goal?: [Matter.Vector, Matter.Vector]
+  health: number
 }
 
 export enum FlipperType { RIGHT, LEFT }
@@ -102,6 +103,11 @@ export interface Sample {
   }
 }
 
+export interface Goal {
+  id: number
+  health: number
+}
+
 export interface Input {
   horizontal: number
   lswing: boolean
@@ -120,6 +126,7 @@ export interface Config {
   }
   player: {
     speed: number
+    health: number
   }
   paddle: {
     width: number
@@ -146,6 +153,7 @@ export interface Config {
       min: number
       max: number
     }
+    damage: number
     radius: number
     sides: number
   }

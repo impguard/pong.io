@@ -26,6 +26,7 @@ const config: Config = {
         min: 1,
         max: 3,
       },
+      damage: 1,
       radius: 5,
       sides: 50,
     },
@@ -35,6 +36,7 @@ const config: Config = {
     },
     player: {
       speed: 0.15,
+      health: 3,
     },
     paddle: {
       width: 15,
@@ -56,7 +58,7 @@ const config: Config = {
         speed: 0.7,
       },
     },
-    numBalls: 10,
+    numBalls: 1,
     numPlayers: 10,
     delta: 16,
   },
