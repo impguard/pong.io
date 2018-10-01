@@ -161,6 +161,18 @@ const handleBall = (app: State.App, ball: Matter.Body) => {
       handleScore(app, ball);
       Game.resetBall(app.game, ball)
   }
+
+  const { min, max } = app.game.config.ball.speed
+  clampVelocity(app, ball, min, max)
+}
+
+const clampVelocity = (app: State.App, body: Matter.Body, min: number, max: number) => {
+  const speed = Matter.Vector.magnitude(body.velocity)
+  const clampedSpeed = _.clamp(speed, min, max)
+  const direction = Matter.Vector.normalise(body.velocity)
+  const clampedVelocity = Matter.Vector.mult(direction, clampedSpeed)
+
+  Matter.Body.setVelocity(body, clampedVelocity)
 }
 
 

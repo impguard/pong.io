@@ -72,7 +72,7 @@ export const resetBall = (state: State, ball: Matter.Body) => {
   const y = 2 * Math.random() - 1
 
   const direction = Matter.Vector.normalise(Matter.Vector.create(x, y))
-  const velocity = Matter.Vector.mult(direction, state.config.ball.speed.max)
+  const velocity = Matter.Vector.mult(direction, state.config.ball.speed.min)
 
   Matter.Body.setPosition(ball, Matter.Vector.create(0, 0))
   Matter.Body.setVelocity(ball, velocity)
