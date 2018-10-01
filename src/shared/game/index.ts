@@ -1,4 +1,3 @@
-import * as EventEmitter from 'events'
 import * as Matter from 'matter-js';
 import * as _ from 'lodash'
 
@@ -30,7 +29,6 @@ export const create = (config: Config): State => {
     flippers: {},
     posts: {},
     runner: {
-      started: false,
       beforeTick: [],
     }
   }
@@ -43,8 +41,6 @@ export const run = (state: State) =>  {
 
     Matter.Engine.update(state.engine, state.config.delta)
   }, state.config.delta)
-
-  state.runner.started = true // DEBUG
 }
 
 

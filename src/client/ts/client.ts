@@ -70,11 +70,11 @@ const setup = (socket: SocketIOClient.Socket) => {
   })
 
   socket.on('goal', (message: Message.Goal) => {
-    const id = message.id
+    const playerId = message.id
     const health = message.health
 
-    app.game.players[id].health = health
-    console.log('Goal on Player ', id)
+    Simulation.health(app, playerId, health)
+    console.log('Goal on Player ', playerId)
   })
 
 }

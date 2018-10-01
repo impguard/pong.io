@@ -156,13 +156,9 @@ export const run = (app: State.App) => {
 const handleBall = (app: State.App, ball: Matter.Body) => {
   const distance = Matter.Vector.magnitude(ball.position)
   const didScore = distance > app.game.config.arena.radius;
-  const didStart = app.game.runner;
 
-  if (didScore && didStart) {
+  if (didScore) {
       handleScore(app, ball);
-  }
-
-  if (didScore && ball != null) {
       Game.resetBall(app.game, ball)
   }
 }
@@ -205,7 +201,7 @@ const lineSegmentsIntersect = (
   p2: Matter.Vector,
   q1: Matter.Vector,
   q2: Matter.Vector,
-  ) => {
+) => {
   const d = (p2.x - p1.x) * (q2.y - q1.y) - (p2.y - p1.y) * (q2.x - q1.x)
   const u = ((q1.x - p1.x) * (q2.y - q1.y) - (q1.y - p1.y) * (q2.x - q1.x)) / d
   const v = ((q1.x - p1.x) * (p2.y - p1.y) - (q1.y - p1.y) * (p2.x - p1.x)) / d

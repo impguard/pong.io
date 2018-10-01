@@ -118,3 +118,7 @@ export const destroy = (app: State.App) => {
   $(app.render.canvas).remove()
   app.render = app.game = null
 }
+
+export const health = (app: State.App, playerId: number, health: number) => {
+  app.game.players[playerId].health = health
+}

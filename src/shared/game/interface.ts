@@ -31,7 +31,6 @@ export interface State {
   config: Config
   runner: {
     id?: any,
-    started: boolean,
     beforeTick: (() => void)[],
   },
   players: {
