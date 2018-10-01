@@ -23,15 +23,16 @@ export interface Flipper {
   body: Matter.Body
   type: FlipperType
   state: FlipperState
+  basePosition: Matter.Vector
   baseAngle: number
 }
 
 export interface State {
-  engine: Matter.Engine,
+  engine: Matter.Engine
   config: Config
   runner: {
-    id?: any,
-    beforeTick: (() => void)[],
+    id?: any
+    beforeTick: (() => void)[]
   },
   players: {
     [id: number]: Player

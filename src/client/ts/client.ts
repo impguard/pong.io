@@ -41,6 +41,11 @@ const setup = (socket: SocketIOClient.Socket) => {
     }
   })
 
+  socket.on('starting', (message: Message.Starting) => {
+    const seconds = message.delay / 1000
+    console.log(`Game is starting in ${seconds} seconds!`)
+  })
+
   socket.on('disconnect', (reason) => {
    if (reason === 'io server disconnect') {
       console.log('disconnected by server')

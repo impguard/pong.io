@@ -5,9 +5,9 @@ import * as logger from 'koa-logger'
 import * as io from 'socket.io'
 import * as fs from 'fs'
 import * as _ from 'lodash'
-import * as State from './state'
 import * as Simulation from './simulation'
 import * as Message from '../shared/message'
+import { Status, App } from './interface'
 import config from './config'
 
 /****************************************
@@ -50,9 +50,11 @@ const httpServer = http.createServer(koa.callback())
  ****************************************/
 
 const create = () => {
-  const app: State.App = {
+  const app: App = {
+    status: Status.READY,
     inputs: {},
     game: null,
+    emit: null,
     server: io(httpServer),
   }
 
@@ -60,12 +62,32 @@ const create = () => {
 
   app.server.on('connection', socket => {
     add(app, socket)
+
+    // const readyToPlay = getPlayerCount(app) >= config.app.match.playersRequired
+    const readyToPlay = true
+    console.log(app.status)
+
+    if (app.status === Status.READY && readyToPlay) {
+      app.status = Status.STARTING
+
+      setTimeout(() => {
+        Simulation.reset(app)
+        app.status = Status.PLAYING
+      }, config.app.match.delay)
+
+      const startingMessage: Message.Starting = {
+        delay: config.app.match.delay,
+      }
+
+      app.server.to('players').emit('starting', startingMessage)
+      console.log(`Starting game in ${config.app.match.delay}ms`)
+    }
   })
 
   return app
 }
 
-const add = (app: State.App, socket: SocketIO.Socket) => {
+const add = (app: App, socket: SocketIO.Socket) => {
   const id = Simulation.assign(app)
 
   if (!id) {
@@ -90,7 +112,7 @@ const add = (app: State.App, socket: SocketIO.Socket) => {
   console.log(`Accepted player. Assigned to ${id}`)
 
   socket.on('disconnect', () => {
-    const remaining = _.size(app.server.of('players').sockets)
+    const remaining = getPlayerCount(app)
 
     if (remaining === 0) {
       console.log('No players remaining!')
@@ -101,6 +123,18 @@ const add = (app: State.App, socket: SocketIO.Socket) => {
     app.inputs[id] = message.input
   })
 }
+
+/****************************************
+ * Application Helpers
+ ****************************************/
+
+const getPlayerCount = (app: App) => {
+  return _.size(app.server.to('players').sockets.length)
+}
+
+/****************************************
+ * Entrypoint
+ ****************************************/
 
 httpServer.listen(80, () => {
   const app = create()

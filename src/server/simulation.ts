@@ -2,12 +2,11 @@ import * as Matter from 'matter-js'
 import * as _ from 'lodash'
 import * as Game from '../shared/game'
 import * as Message from '../shared/message'
-import * as State from './state'
 import config from './config'
-import { FlipperSample } from '../shared/game';
+import { App, Status } from './interface'
 
 
-export const setup = (app: State.App) => {
+export const setup = (app: App) => {
   app.game =  Game.create(config.game)
 
   // Spawn the balls into the game
@@ -55,7 +54,7 @@ export const setup = (app: State.App) => {
   Game.onBeforeTick(app.game, () => tick(app))
 }
 
-export const sample = (app: State.App): Game.Sample => {
+export const sample = (app: App): Game.Sample => {
   // May be worth optimizing this area of code
   const balls = _.mapValues(app.game.balls, ball => ({
     x: ball.position.x,
@@ -94,7 +93,7 @@ const sampleFlipper = (flipper: Game.Flipper): Game.FlipperSample => {
   }
 }
 
-export const sampleInitial = (app: State.App): Game.InitialSample => {
+export const sampleInitial = (app: App): Game.InitialSample => {
   const posts = _.mapValues(app.game.posts, posts => ({
     x: posts.position.x,
     y: posts.position.y,
@@ -114,7 +113,7 @@ export const sampleInitial = (app: State.App): Game.InitialSample => {
 }
 
 
-export const tick = (app: State.App) => {
+export const tick = (app: App) => {
   _.forEach(app.game.balls, (ball: Matter.Body) => {
     handleBall(app, ball)
   })
@@ -130,20 +129,49 @@ export const tick = (app: State.App) => {
 }
 
 
-export const assign = (app: State.App): number => {
+export const assign = (app: App): number => {
   const player = Game.assign(app.game)
   const id = player ? player.composite.id : null
   return id
 }
 
 
-export const input = (app: State.App, id: number, input: Game.Input) => {
+export const input = (app: App, id: number, input: Game.Input) => {
   const player = app.game.players[id]
   Game.input(app.game, player, input)
 }
 
 
-export const run = (app: State.App) => {
+export const reset = (app: App) => {
+  _.forEach(app.game.balls, (ball: Matter.Body) => {
+    Game.resetBall(app.game, ball)
+  })
+
+  _.forEach(app.game.players, (player) => {
+    const position = player.basePosition
+    const angle = player.baseAngle
+
+    Matter.Body.setPosition(player.paddle, position)
+    Matter.Body.setVelocity(player.paddle, Matter.Vector.create(0, 0))
+
+    resetFlipper(player.lflipper)
+    resetFlipper(player.rflipper)
+  })
+}
+
+
+const resetFlipper = (flipper: Game.Flipper) => {
+  Matter.Body.setPosition(flipper.body, flipper.basePosition)
+  Matter.Body.setVelocity(flipper.body, Matter.Vector.create(0, 0))
+
+  Matter.Body.setAngle(flipper.body, flipper.baseAngle)
+  Matter.Body.setAngularVelocity(flipper.body, 0)
+
+  flipper.state = Game.FlipperState.READY
+}
+
+
+export const run = (app: App) => {
   Game.run(app.game)
 }
 
@@ -153,12 +181,16 @@ export const run = (app: State.App) => {
  ****************************************/
 
 
-const handleBall = (app: State.App, ball: Matter.Body) => {
+const handleBall = (app: App, ball: Matter.Body) => {
   const distance = Matter.Vector.magnitude(ball.position)
   const didScore = distance > app.game.config.arena.radius;
+  const didStart = app.status === Status.PLAYING
+
+  if (didScore && didStart) {
+      handleScore(app, ball);
+  }
 
   if (didScore) {
-      handleScore(app, ball);
       Game.resetBall(app.game, ball)
   }
 
@@ -176,7 +208,7 @@ const clampVelocity = (app: State.App, body: Matter.Body, min: number, max: numb
 }
 
 
-const handleScore = (app: State.App, ball: Matter.Body) => {
+const handleScore = (app: App, ball: Matter.Body) => {
   _.forEach(app.game.players, player => {
     if (player.health <= 0) return
 
@@ -192,7 +224,7 @@ const handleScore = (app: State.App, ball: Matter.Body) => {
 }
 
 
-const score = (app: State.App, ball: Matter.Body, player: Game.Player) => {
+const score = (app: App, ball: Matter.Body, player: Game.Player) => {
   player.health -= app.game.config.ball.damage;
 
   app.server.to('players').emit('goal', {
@@ -203,7 +235,7 @@ const score = (app: State.App, ball: Matter.Body, player: Game.Player) => {
   const isDead = player.health <= 0
 
   if (isDead) {
-    console.log('Player is dead')
+    console.log(`Player ${player.composite.id} is dead!`)
   }
 }
 

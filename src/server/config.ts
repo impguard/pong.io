@@ -1,18 +1,17 @@
-
 import * as Game from '../shared/game'
 
 
 interface Config {
   app: {
     network: {
-      delta: number,
+      delta: number
     }
     match: {
-      delay: number,
-      timeout: number,
-    },
-  },
-  game: Game.Config,
+      playersRequired: number
+      delay: number
+    }
+  }
+  game: Game.Config
 }
 
 
@@ -67,8 +66,8 @@ const config: Config = {
       delta: 100,
     },
     match: {
+      playersRequired: 1,
       delay: 5000,
-      timeout: 300000,
     },
   },
 }

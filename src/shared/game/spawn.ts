@@ -148,6 +148,7 @@ const spawnFlipper = (state: State, options: ISpawnFlipperOptions) => {
     state: FlipperState.READY,
     type: options.type,
     baseAngle: options.angle,
+    basePosition: options.position,
   }
   state.flippers[flipper.body.id] = flipper
 

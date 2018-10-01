@@ -21,6 +21,10 @@ export interface GameState {
   sample: Game.Sample
 }
 
+export interface Starting {
+  delay: number
+}
+
 export interface Input {
   input: Game.Input
 }
