@@ -74,15 +74,24 @@ export const sync = (app: State.App, sample: Game.Sample) => {
   _.forEach(sample.players, (value, id) => {
     const player: Game.Player = app.game.players[id]
 
-    Game.setPlayerVelocity(app.game, player, Matter.Vector.create(value.vx, value.vy))
-    Matter.Body.setPosition(player.paddle, Matter.Vector.create(value.px, value.py))
-    Matter.Body.setPosition(player.lflipper.body, Matter.Vector.create(value.lfx, value.lfy))
-    Matter.Body.setPosition(player.rflipper.body, Matter.Vector.create(value.rfx, value.rfy))
-    Matter.Body.setAngle(player.lflipper.body, value.lfa)
-    Matter.Body.setAngle(player.rflipper.body, value.rfa)
-    player.lflipper.state = value.lfs
-    player.rflipper.state = value.rfs
+    Matter.Body.setPosition(player.paddle, Matter.Vector.create(value.p.x, value.p.y))
+    Matter.Body.setVelocity(player.paddle, Matter.Vector.create(value.p.vx, value.p.vy))
+
+    syncFlipper(player.lflipper, value.lf)
+    syncFlipper(player.rflipper, value.rf)
   })
+}
+
+const syncFlipper = (flipper: Game.Flipper, sample: Game.FlipperSample) => {
+  const { body } = flipper
+
+  flipper.state = sample.s
+
+  Matter.Body.setPosition(body, Matter.Vector.create(sample.x, sample.y))
+  Matter.Body.setVelocity(body, Matter.Vector.create(sample.vx, sample.vy))
+
+  Matter.Body.setAngle(body, sample.a)
+  Matter.Body.setAngularVelocity(body, sample.va)
 }
 
 export const tick = (app: State.App) => {

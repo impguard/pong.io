@@ -1,18 +1,17 @@
 import * as Matter from 'matter-js';
 import * as _ from 'lodash'
 
-import * as Interface from './interface'
+import { Config, State } from './interface'
 
 export * from './interface'
 export * from './spawn'
-export * from './logic'
 export * from './input'
 
 /****************************************
  * Lifecycle Functions
  ****************************************/
 
-export const create = (config: Interface.Config): Interface.State => {
+export const create = (config: Config): State => {
   const world = Matter.World.create({
     gravity: {
       scale: 0, x: 0, y: 0
@@ -36,7 +35,7 @@ export const create = (config: Interface.Config): Interface.State => {
 }
 
 
-export const run = (state: Interface.State) =>  {
+export const run = (state: State) =>  {
   state.runner.id = setInterval(() => {
     _.forEach(state.runner.beforeTick, callback => callback())
 
@@ -45,20 +44,20 @@ export const run = (state: Interface.State) =>  {
 }
 
 
-export const stop = (state: Interface.State) => {
+export const stop = (state: State) => {
   clearInterval(state.runner.id)
 }
 
 
-export const destroy = (state: Interface.State) => {
+export const destroy = (state: State) => {
   Matter.Engine.clear(state.engine)
 }
 
 /****************************************
- * Lifecycle Helpers
+ * Game Logic Helpers
  ****************************************/
 
-export const assign = (state: Interface.State) => {
+export const assign = (state: State) => {
   const player = _.find(state.players, player => !player.assigned)
 
   if (player) {
@@ -68,10 +67,21 @@ export const assign = (state: Interface.State) => {
   return player
 }
 
+export const resetBall = (state: State, ball: Matter.Body) => {
+  const x = 2 * Math.random() - 1
+  const y = 2 * Math.random() - 1
+
+  const direction = Matter.Vector.normalise(Matter.Vector.create(x, y))
+  const velocity = Matter.Vector.mult(direction, state.config.ball.speed.max)
+
+  Matter.Body.setPosition(ball, Matter.Vector.create(0, 0))
+  Matter.Body.setVelocity(ball, velocity)
+}
+
 /****************************************
  * Events Registrators
  ****************************************/
 
-export const onBeforeTick = (state: Interface.State, callback: () => void) => {
+export const onBeforeTick = (state: State, callback: () => void) => {
   state.runner.beforeTick.push(callback)
 }
