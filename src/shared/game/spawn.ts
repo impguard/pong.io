@@ -86,7 +86,6 @@ export const spawnPlayer = (state: State, options: ISpawnPlayerOptions) => {
   Matter.World.add(state.engine.world, player)
   state.players[player.id] = {
     composite: player,
-    velocity: Matter.Vector.create(0, 0),
     baseAngle: options.angle,
     basePosition: options.position,
     up,
@@ -108,20 +107,16 @@ interface ISpawnPaddleOptions {
 }
 
 const spawnPaddle = (state: State, options: ISpawnPaddleOptions) => {
-  const paddle = Matter.Bodies.rectangle(
-    0, 0,
-    state.config.paddle.width,
-    state.config.paddle.height,
-    {
-      isStatic: true,
-      collisionFilter: {
-        group: 0,
-        category: 2,
-        mask: ~0,
-      },
-      ...options,
-    }
-  )
+  const { width, height } = state.config.paddle
+  const paddle = Matter.Bodies.rectangle(0, 0, width, height, {
+    isStatic: true,
+    collisionFilter: {
+      group: 0,
+      category: 2,
+      mask: ~0,
+    },
+    ...options,
+  })
 
   return paddle
 }
@@ -135,22 +130,17 @@ interface ISpawnFlipperOptions {
 
 const spawnFlipper = (state: State, options: ISpawnFlipperOptions) => {
   const bodyOptions = _.omit(options, 'type')
+  const { width, height } = state.config.flipper
 
-  const body = Matter.Bodies.rectangle(
-    0, 0,
-    state.config.flipper.width,
-    state.config.flipper.height,
-    {
-      mass: 1000,
-      isStatic: true,
-      collisionFilter: {
-        group: 0,
-        category: 2,
-        mask: ~0,
-      },
-      ...bodyOptions
-    }
-  )
+  const body = Matter.Bodies.rectangle(0, 0, width, height, {
+    isStatic: true,
+    collisionFilter: {
+      group: 0,
+      category: 2,
+      mask: ~0,
+    },
+    ...bodyOptions
+  })
 
   const flipper = {
     body,
@@ -170,7 +160,8 @@ interface ISpawnPostOptions {
 }
 
 export const spawnPost = (state: State, options: ISpawnPostOptions) =>  {
-  const post = Matter.Bodies.rectangle(0, 0, state.config.post.width, state.config.post.height, {
+  const { width, height } = state.config.post
+  const post = Matter.Bodies.rectangle(0, 0, width, height, {
     isStatic: true,
     collisionFilter: {
       group: 0,

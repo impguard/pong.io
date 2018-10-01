@@ -11,7 +11,6 @@ export interface Player {
   paddle: Matter.Body
   lflipper: Flipper
   rflipper: Flipper
-  velocity: Matter.Vector
   goal?: [Matter.Vector, Matter.Vector]
 }
 
@@ -70,6 +69,16 @@ export interface InitialSample {
   }
 }
 
+export interface FlipperSample {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  a: number
+  va: number
+  s: FlipperState
+}
+
 export interface Sample {
   balls: {
     [id: number]: {
@@ -81,18 +90,14 @@ export interface Sample {
   }
   players: {
     [id: number]: {
-      vx: number
-      vy: number
-      px: number
-      py: number
-      lfx: number
-      lfy: number
-      lfa: number
-      lfs: FlipperState
-      rfx: number
-      rfy: number
-      rfa: number
-      rfs: FlipperState
+      p: {
+        x: number
+        y: number
+        vx: number
+        vy: number
+      }
+      lf: FlipperSample
+      rf: FlipperSample
     }
   }
 }

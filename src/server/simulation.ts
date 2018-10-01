@@ -3,6 +3,7 @@ import * as _ from 'lodash'
 import * as Game from '../shared/game'
 import * as State from './state'
 import config from './config'
+import { FlipperSample } from '../shared/game';
 
 
 export const setup = (app: State.App) => {
@@ -53,7 +54,6 @@ export const setup = (app: State.App) => {
   Game.onBeforeTick(app.game, () => tick(app))
 }
 
-
 export const sample = (app: State.App): Game.Sample => {
   // May be worth optimizing this area of code
   const balls = _.mapValues(app.game.balls, ball => ({
@@ -65,22 +65,32 @@ export const sample = (app: State.App): Game.Sample => {
 
   const players = _.mapValues(app.game.players, player => {
     return {
-      vx: player.velocity.x,
-      vy: player.velocity.y,
-      px: player.paddle.position.x,
-      py: player.paddle.position.y,
-      lfa: player.lflipper.body.angle,
-      lfx: player.lflipper.body.position.x,
-      lfy: player.lflipper.body.position.y,
-      lfs: player.lflipper.state,
-      rfa: player.rflipper.body.angle,
-      rfx: player.rflipper.body.position.x,
-      rfy: player.rflipper.body.position.y,
-      rfs: player.rflipper.state,
+      p: {
+        x: player.paddle.position.x,
+        y: player.paddle.position.y,
+        vx: player.paddle.velocity.x,
+        vy: player.paddle.velocity.y,
+      },
+      lf: sampleFlipper(player.lflipper),
+      rf: sampleFlipper(player.rflipper),
     }
   })
 
   return {balls, players}
+}
+
+const sampleFlipper = (flipper: Game.Flipper): Game.FlipperSample => {
+  const { body } = flipper
+
+  return {
+    s: flipper.state,
+    x: body.position.x,
+    y: body.position.y,
+    a: body.angle,
+    vx: body.velocity.x,
+    vy: body.velocity.y,
+    va: body.angularVelocity,
+  }
 }
 
 export const sampleInitial = (app: State.App): Game.InitialSample => {
