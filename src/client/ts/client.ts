@@ -60,6 +60,11 @@ const setup = (socket: SocketIOClient.Socket) => {
     const element = $("#game").get(0)
 
     Simulation.setup(app, {element, config, sample})
+
+    const player = app.game.players[app.assignment]
+    const angle = player.baseAngle
+    $(app.render.canvas).css('transform', `scaleY(-1) rotate(-${angle}rad)`)
+
     Simulation.run(app)
 
     Scene.change(Scene.Name.Game)
@@ -97,13 +102,4 @@ $('#play').click(() =>  {
   const port = $("#port").val()
 
   connect(app, name, host, port)
-})
-
-$('#reset').click(() => {
-  const host = app.server.host
-  const port = app.server.port
-
-  fetch(`http://${host}:${port}/reset`)
-
-  reset(app)
 })
