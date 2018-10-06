@@ -6,7 +6,6 @@ import * as Gamepad from './gamepad'
 import * as Game from '../../shared/game'
 import * as Message from '../../shared/message'
 
-
 interface ISimulationOptions {
   element: HTMLElement
   config: Game.Config
@@ -50,7 +49,7 @@ export const setup = (app: State.App, options: ISimulationOptions) => {
   // @ts-ignore
   Matter.Render.lookAt(render, {
     min: {x: -400, y: -400},
-    max: {x: 400, y: 400}
+    max: {x: 400, y: 400},
   })
 
   app.render = render
@@ -108,7 +107,6 @@ export const run = (app: State.App) => {
   Game.run(app.game)
   Matter.Render.run(app.render)
 }
-
 
 export const destroy = (app: State.App) => {
   Game.stop(app.game)

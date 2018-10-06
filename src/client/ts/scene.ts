@@ -1,6 +1,6 @@
 export enum Name {
   Home = 'home',
-  Game = 'game'
+  Game = 'game',
 }
 
 let scene = document.getElementById(Name.Home)

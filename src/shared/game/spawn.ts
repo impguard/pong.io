@@ -1,7 +1,6 @@
-import * as Matter from 'matter-js';
+import * as Matter from 'matter-js'
 import * as _ from 'lodash'
 import { State, FlipperType, FlipperState } from './interface'
-
 
 interface ISpawnBallOptions {
   id?: number
@@ -22,7 +21,7 @@ export const spawnBall = (state: State, options?: ISpawnBallOptions) => {
         category: 1,
         mask: ~0 << 1,
       },
-      ...options
+      ...options,
   })
 
   Matter.World.add(state.engine.world, ball)
@@ -41,7 +40,6 @@ interface ISpawnPlayerOptions {
   goal?: [Matter.Vector, Matter.Vector]
 }
 
-
 export const spawnPlayer = (state: State, options: ISpawnPlayerOptions) => {
   const paddle = spawnPaddle(state, {
     ...(options.paddleId && { id: options.paddleId }),
@@ -57,11 +55,11 @@ export const spawnPlayer = (state: State, options: ISpawnPlayerOptions) => {
 
   const lfposition = Matter.Vector.add(
     options.position,
-    Matter.Vector.mult(right, -fspacing)
+    Matter.Vector.mult(right, -fspacing),
   )
   const rfposition = Matter.Vector.add(
     options.position,
-    Matter.Vector.mult(right, fspacing)
+    Matter.Vector.mult(right, fspacing),
   )
 
   const lflipper = spawnFlipper(state, {
@@ -140,7 +138,7 @@ const spawnFlipper = (state: State, options: ISpawnFlipperOptions) => {
       category: 2,
       mask: ~0,
     },
-    ...bodyOptions
+    ...bodyOptions,
   })
 
   const flipper = {

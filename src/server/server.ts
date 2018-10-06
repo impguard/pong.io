@@ -19,7 +19,7 @@ const router = new Router()
 
 router.get('/health', (ctx) => {
   ctx.body = {
-    'health': 'ENABLED'
+    health: 'ENABLED',
   }
 })
 
@@ -30,7 +30,7 @@ router.get('/reset', (ctx) => {
     'Access-Control-Allow-Headers': 'Content-Type',
   })
   ctx.body = {
-    'state': 'RESET'
+    state: 'RESET',
   }
 })
 
@@ -60,7 +60,7 @@ const create = () => {
 
   Simulation.setup(app)
 
-  app.server.on('connection', socket => {
+  app.server.on('connection', (socket) => {
     add(app, socket)
 
     // const readyToPlay = getPlayerCount(app) >= config.app.match.playersRequired
@@ -103,7 +103,7 @@ const add = (app: App, socket: SocketIO.Socket) => {
   const acceptMessage: Message.Accept = {
     id,
     config: app.game.config,
-    sample: Simulation.sampleInitial(app)
+    sample: Simulation.sampleInitial(app),
   }
 
   socket.emit('accepted', acceptMessage)
@@ -143,7 +143,7 @@ httpServer.listen(80, () => {
 
   setInterval(() => {
     const message: Message.GameState = {
-      sample: Simulation.sample(app)
+      sample: Simulation.sample(app),
     }
 
     app.server.to('players').emit('gamestate', message)

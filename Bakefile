@@ -166,6 +166,12 @@ function run.live {
   compose up
 }
 
+bake_task lint "Runs the linter"
+function lint {
+  yarn lint:client "$@"
+  yarn lint:server "$@"
+}
+
 
 bake_task tag "Tags the current branch with the next version."
 function tag ()
@@ -203,6 +209,8 @@ function push {
     bake_echo_red "usage: bake push dev|prod"
     return 1
   fi
+
+  lint
 
   local tier version tag
   tier=$1

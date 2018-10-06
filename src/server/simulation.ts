@@ -5,7 +5,6 @@ import * as Message from '../shared/message'
 import config from './config'
 import { App, Status } from './interface'
 
-
 export const setup = (app: App) => {
   app.game =  Game.create(config.game)
 
@@ -19,7 +18,7 @@ export const setup = (app: App) => {
   const radius = config.game.arena.radius
 
   // Spawn each goal post
-  const theta = 2 * Math.PI / numPlayers;
+  const theta = 2 * Math.PI / numPlayers
 
   const posts = _.map(_.range(0, numPlayers), (number) => {
     const angle = number * theta
@@ -56,14 +55,14 @@ export const setup = (app: App) => {
 
 export const sample = (app: App): Game.Sample => {
   // May be worth optimizing this area of code
-  const balls = _.mapValues(app.game.balls, ball => ({
+  const balls = _.mapValues(app.game.balls, (ball) => ({
     x: ball.position.x,
     y: ball.position.y,
     vx: ball.velocity.x,
     vy: ball.velocity.y,
   }))
 
-  const players = _.mapValues(app.game.players, player => {
+  const players = _.mapValues(app.game.players, (player) => {
     return {
       p: {
         x: player.paddle.position.x,
@@ -94,13 +93,13 @@ const sampleFlipper = (flipper: Game.Flipper): Game.FlipperSample => {
 }
 
 export const sampleInitial = (app: App): Game.InitialSample => {
-  const posts = _.mapValues(app.game.posts, posts => ({
+  const posts = _.mapValues(app.game.posts, (posts) => ({
     x: posts.position.x,
     y: posts.position.y,
     a: posts.angle,
   }))
 
-  const players = _.mapValues(app.game.players, player => ({
+  const players = _.mapValues(app.game.players, (player) => ({
     x: player.basePosition.x,
     y: player.basePosition.y,
     a: player.baseAngle,
@@ -112,7 +111,6 @@ export const sampleInitial = (app: App): Game.InitialSample => {
   return {posts, players}
 }
 
-
 export const tick = (app: App) => {
   _.forEach(app.game.balls, (ball: Matter.Body) => {
     handleBall(app, ball)
@@ -122,12 +120,11 @@ export const tick = (app: App) => {
     const player: Game.Player = app.game.players[id]
     const isAlive = player.health > 0
 
-    if (isAlive) Game.input(app.game, player, input)
+    if (isAlive) { Game.input(app.game, player, input) }
   })
 
   app.inputs = {}
 }
-
 
 export const assign = (app: App): number => {
   const player = Game.assign(app.game)
@@ -135,12 +132,10 @@ export const assign = (app: App): number => {
   return id
 }
 
-
 export const input = (app: App, id: number, input: Game.Input) => {
   const player = app.game.players[id]
   Game.input(app.game, player, input)
 }
-
 
 export const reset = (app: App) => {
   _.forEach(app.game.balls, (ball: Matter.Body) => {
@@ -159,7 +154,6 @@ export const reset = (app: App) => {
   })
 }
 
-
 const resetFlipper = (flipper: Game.Flipper) => {
   Matter.Body.setPosition(flipper.body, flipper.basePosition)
   Matter.Body.setVelocity(flipper.body, Matter.Vector.create(0, 0))
@@ -170,24 +164,21 @@ const resetFlipper = (flipper: Game.Flipper) => {
   flipper.state = Game.FlipperState.READY
 }
 
-
 export const run = (app: App) => {
   Game.run(app.game)
 }
-
 
 /****************************************
  * Gameplay Logic
  ****************************************/
 
-
 const handleBall = (app: App, ball: Matter.Body) => {
   const distance = Matter.Vector.magnitude(ball.position)
-  const didScore = distance > app.game.config.arena.radius;
+  const didScore = distance > app.game.config.arena.radius
   const didStart = app.status === Status.PLAYING
 
   if (didScore && didStart) {
-      handleScore(app, ball);
+      handleScore(app, ball)
   }
 
   if (didScore) {
@@ -207,25 +198,23 @@ const clampVelocity = (app: State.App, body: Matter.Body, min: number, max: numb
   Matter.Body.setVelocity(body, clampedVelocity)
 }
 
-
 const handleScore = (app: App, ball: Matter.Body) => {
-  _.forEach(app.game.players, player => {
-    if (player.health <= 0) return
+  _.forEach(app.game.players, (player) => {
+    if (player.health <= 0) { return }
 
-    var didScore = lineSegmentsIntersect(
+    let didScore = lineSegmentsIntersect(
         Matter.Vector.create(0, 0), ball.position,
-        player.goal[0], player.goal[1]
-    );
+        player.goal[0], player.goal[1],
+    )
 
     if (didScore) {
-      score(app, ball, player);
+      score(app, ball, player)
     }
   })
 }
 
-
 const score = (app: App, ball: Matter.Body, player: Game.Player) => {
-  player.health -= app.game.config.ball.damage;
+  player.health -= app.game.config.ball.damage
 
   app.server.to('players').emit('goal', {
     id: player.composite.id,
@@ -238,7 +227,6 @@ const score = (app: App, ball: Matter.Body, player: Game.Player) => {
     console.log(`Player ${player.composite.id} is dead!`)
   }
 }
-
 
 const lineSegmentsIntersect = (
   p1: Matter.Vector,

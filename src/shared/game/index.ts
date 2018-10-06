@@ -1,4 +1,4 @@
-import * as Matter from 'matter-js';
+import * as Matter from 'matter-js'
 import * as _ from 'lodash'
 
 import { Config, State } from './interface'
@@ -14,8 +14,8 @@ export * from './input'
 export const create = (config: Config): State => {
   const world = Matter.World.create({
     gravity: {
-      scale: 0, x: 0, y: 0
-    }
+      scale: 0, x: 0, y: 0,
+    },
   })
 
   const engine = Matter.Engine.create({world})
@@ -30,24 +30,21 @@ export const create = (config: Config): State => {
     posts: {},
     runner: {
       beforeTick: [],
-    }
+    },
   }
 }
 
-
 export const run = (state: State) =>  {
   state.runner.id = setInterval(() => {
-    _.forEach(state.runner.beforeTick, callback => callback())
+    _.forEach(state.runner.beforeTick, (callback) => callback())
 
     Matter.Engine.update(state.engine, state.config.delta)
   }, state.config.delta)
 }
 
-
 export const stop = (state: State) => {
   clearInterval(state.runner.id)
 }
-
 
 export const destroy = (state: State) => {
   Matter.Engine.clear(state.engine)
@@ -58,7 +55,7 @@ export const destroy = (state: State) => {
  ****************************************/
 
 export const assign = (state: State) => {
-  const player = _.find(state.players, player => !player.assigned)
+  const player = _.find(state.players, (player) => !player.assigned)
 
   if (player) {
     player.assigned = true

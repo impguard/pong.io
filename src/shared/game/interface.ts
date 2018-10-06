@@ -1,6 +1,5 @@
 import * as Matter from 'matter-js'
 
-
 export interface Player {
   composite: Matter.Composite
   basePosition: Matter.Vector
@@ -32,22 +31,22 @@ export interface State {
   config: Config
   runner: {
     id?: any
-    beforeTick: (() => void)[]
+    beforeTick: Array<() => void>,
   },
   players: {
-    [id: number]: Player
+    [id: number]: Player,
   }
   balls: {
-    [id: number]: Matter.Body
+    [id: number]: Matter.Body,
   },
   paddles: {
-    [id: number]: Matter.Body
+    [id: number]: Matter.Body,
   },
   flippers: {
-    [id: number]: Flipper
+    [id: number]: Flipper,
   }
   posts: {
-    [id: number]: Matter.Body
+    [id: number]: Matter.Body,
   }
 }
 
@@ -59,15 +58,15 @@ export interface InitialSample {
       a: number
       p: number
       lf: number
-      rf: number
-    }
+      rf: number,
+    },
   },
   posts: {
     [id: number]: {
       x: number
       y: number
-      a: number
-    }
+      a: number,
+    },
   }
 }
 
@@ -87,8 +86,8 @@ export interface Sample {
       x: number
       y: number
       vx: number
-      vy: number
-    }
+      vy: number,
+    },
   }
   players: {
     [id: number]: {
@@ -96,11 +95,11 @@ export interface Sample {
         x: number
         y: number
         vx: number
-        vy: number
+        vy: number,
       }
       lf: FlipperSample
-      rf: FlipperSample
-    }
+      rf: FlipperSample,
+    },
   }
 }
 
@@ -119,19 +118,19 @@ export interface Config {
   numPlayers: number
   numBalls: number
   arena: {
-    radius: number
+    radius: number,
   },
   post: {
     width: number
-    height: number
+    height: number,
   }
   player: {
     speed: number
-    health: number
+    health: number,
   }
   paddle: {
     width: number
-    height: number
+    height: number,
   }
   flipper: {
     width: number
@@ -139,24 +138,24 @@ export interface Config {
     spacing: number
     charge: {
       speed: number
-      angle: number
+      angle: number,
     }
     swing: {
       speed: number
-      angle: number
+      angle: number,
     }
     reset: {
-      speed: number
-    }
+      speed: number,
+    },
   }
   ball: {
     speed: {
       min: number
-      max: number
+      max: number,
     }
     damage: number
     radius: number
-    sides: number
+    sides: number,
   }
   delta: number
 }

@@ -1,19 +1,17 @@
 import * as Game from '../shared/game'
 
-
 interface Config {
   app: {
     network: {
-      delta: number
+      delta: number,
     }
     match: {
       playersRequired: number
-      delay: number
-    }
+      delay: number,
+    },
   }
   game: Game.Config
 }
-
 
 const config: Config = {
   game: {

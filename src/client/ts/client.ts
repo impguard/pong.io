@@ -6,7 +6,6 @@ import * as State from './state'
 import * as Game from '../../shared/game'
 import * as Message from '../../shared/message'
 
-
 const app: State.App = {
   socket: null,
   server: null,
@@ -23,7 +22,7 @@ const app: State.App = {
  */
 
 const connect = (app: State.App, name, host, port) => {
-  if (app.socket) app.socket.disconnect()
+  if (app.socket) { app.socket.disconnect() }
 
   app.server = {host, port}
   app.name = name
@@ -37,7 +36,7 @@ const setup = (socket: SocketIOClient.Socket) => {
 
   socket.on('rejected', (message: Message.Reject) => {
     if (message.code == Message.ErrorCode.MATCHFULL) {
-      alert("match is full")
+      alert('match is full')
     }
   })
 
@@ -50,8 +49,7 @@ const setup = (socket: SocketIOClient.Socket) => {
    if (reason === 'io server disconnect') {
       console.log('disconnected by server')
       reset(app)
-    }
-    else {
+    } else {
       console.log('disconnected...attempting to reconnect')
     }
   })
@@ -62,7 +60,7 @@ const setup = (socket: SocketIOClient.Socket) => {
     app.accepted = true
     app.assignment = id
 
-    const element = $("#game").get(0)
+    const element = $('#game').get(0)
 
     Simulation.setup(app, {element, config, sample})
 
@@ -90,8 +88,8 @@ const setup = (socket: SocketIOClient.Socket) => {
 }
 
 const reset = (app: State.App) => {
-  if (app.socket) app.socket.disconnect()
-  if (app.game) Simulation.destroy(app)
+  if (app.socket) { app.socket.disconnect() }
+  if (app.game) { Simulation.destroy(app) }
 
   app.accepted = false
   Scene.change(Scene.Name.Home)
@@ -102,9 +100,9 @@ const reset = (app: State.App) => {
  */
 
 $('#play').click(() =>  {
-  const name = $("#name").val()
-  const host = $("#host").val()
-  const port = $("#port").val()
+  const name = $('#name').val()
+  const host = $('#host').val()
+  const port = $('#port').val()
 
   connect(app, name, host, port)
 })
