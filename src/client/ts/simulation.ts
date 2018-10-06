@@ -8,11 +8,11 @@ import * as Message from '../../shared/message'
 
 interface ISimulationOptions {
   element: HTMLElement
-  config: Game.Config
-  sample: Game.InitialSample
+  config: Game.IConfig
+  sample: Game.ISampleInitial
 }
 
-export const setup = (app: State.App, options: ISimulationOptions) => {
+export const setup = (app: State.IApp, options: ISimulationOptions) => {
   app.game = Game.create(options.config)
 
   _.forEach(options.sample.players, (player, id)  => {
@@ -57,7 +57,7 @@ export const setup = (app: State.App, options: ISimulationOptions) => {
   Game.onBeforeTick(app.game, () => tick(app))
 }
 
-export const sync = (app: State.App, sample: Game.Sample) => {
+export const sync = (app: State.IApp, sample: Game.ISample) => {
   _.forEach(sample.balls, (value, id) => {
     const position = Matter.Vector.create(value.x, value.y)
     const velocity = Matter.Vector.create(value.vx, value.vy)
@@ -71,7 +71,7 @@ export const sync = (app: State.App, sample: Game.Sample) => {
   })
 
   _.forEach(sample.players, (value, id) => {
-    const player: Game.Player = app.game.players[id]
+    const player: Game.IPlayer = app.game.players[id]
 
     Matter.Body.setPosition(player.paddle, Matter.Vector.create(value.p.x, value.p.y))
     Matter.Body.setVelocity(player.paddle, Matter.Vector.create(value.p.vx, value.p.vy))
@@ -81,7 +81,7 @@ export const sync = (app: State.App, sample: Game.Sample) => {
   })
 }
 
-const syncFlipper = (flipper: Game.Flipper, sample: Game.FlipperSample) => {
+const syncFlipper = (flipper: Game.IFlipper, sample: Game.ISampleFlipper) => {
   const { body } = flipper
 
   flipper.state = sample.s
@@ -93,22 +93,22 @@ const syncFlipper = (flipper: Game.Flipper, sample: Game.FlipperSample) => {
   Matter.Body.setAngularVelocity(body, sample.va)
 }
 
-export const tick = (app: State.App) => {
+export const tick = (app: State.IApp) => {
   const input = Gamepad.sample()
   const player = app.game.players[app.assignment]
 
-  Game.input(app.game, player, input)
+  Game.handleInput(app.game, player, input)
 
-  const message: Message.Input = {input}
+  const message: Message.IInput = {input}
   app.socket.emit('input', message)
 }
 
-export const run = (app: State.App) => {
+export const run = (app: State.IApp) => {
   Game.run(app.game)
   Matter.Render.run(app.render)
 }
 
-export const destroy = (app: State.App) => {
+export const destroy = (app: State.IApp) => {
   Game.stop(app.game)
   Game.destroy(app.game)
   Matter.Render.stop(app.render)
@@ -116,6 +116,6 @@ export const destroy = (app: State.App) => {
   app.render = app.game = null
 }
 
-export const health = (app: State.App, playerId: number, health: number) => {
+export const playerhealth = (app: State.IApp, playerId: number, health: number) => {
   app.game.players[playerId].health = health
 }

@@ -168,7 +168,9 @@ function run.live {
 
 bake_task lint "Runs the linter"
 function lint {
+  bake_echo_yellow "Linting client..."
   yarn lint:client "$@"
+  bake_echo_yellow "Linting server..."
   yarn lint:server "$@"
 }
 

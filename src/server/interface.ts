@@ -2,12 +2,12 @@ import * as Game from '../shared/game'
 
 export enum Status { READY, STARTING, PLAYING, FINISHED }
 
-export interface App {
+export interface IApp {
   status: Status
   emit: (event: string | symbol, ...args: any[]) => boolean
   server: SocketIO.Server
-  game: Game.State
+  game: Game.IState
   inputs: {
-    [id: number]: Game.Input,
+    [id: number]: Game.IInput,
   }
 }

@@ -9,8 +9,8 @@ const keys = {
   k: false,
 }
 
-export const sample = (): Game.Input => {
-  const input: Game.Input = {
+export const sample = (): Game.IInput => {
+  const input: Game.IInput = {
     horizontal: keys.right - keys.left,
     lswing: keys.j,
     rswing: keys.k,

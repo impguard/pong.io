@@ -6,7 +6,7 @@ import * as State from './state'
 import * as Game from '../../shared/game'
 import * as Message from '../../shared/message'
 
-const app: State.App = {
+const globalApp: State.IApp = {
   socket: null,
   server: null,
   name: null,
@@ -21,26 +21,26 @@ const app: State.App = {
  * State Handlers
  */
 
-const connect = (app: State.App, name, host, port) => {
+const connect = (app: State.IApp, name, host, port) => {
   if (app.socket) { app.socket.disconnect() }
 
   app.server = {host, port}
   app.name = name
   app.socket = io(`${host}:${port}`)
 
-  setup(app.socket)
+  setup(app, app.socket)
 }
 
-const setup = (socket: SocketIOClient.Socket) => {
+const setup = (app: State.IApp, socket: SocketIOClient.Socket) => {
   socket.emit('join', name)
 
-  socket.on('rejected', (message: Message.Reject) => {
-    if (message.code == Message.ErrorCode.MATCHFULL) {
+  socket.on('rejected', (message: Message.IReject) => {
+    if (message.code === Message.ErrorCode.MATCHFULL) {
       alert('match is full')
     }
   })
 
-  socket.on('starting', (message: Message.Starting) => {
+  socket.on('starting', (message: Message.IStarting) => {
     const seconds = message.delay / 1000
     console.log(`Game is starting in ${seconds} seconds!`)
   })
@@ -54,7 +54,7 @@ const setup = (socket: SocketIOClient.Socket) => {
     }
   })
 
-  socket.on('accepted', (message: Message.Accept) => {
+  socket.on('accepted', (message: Message.IAccept) => {
     const { id, config, sample } = message
 
     app.accepted = true
@@ -73,21 +73,21 @@ const setup = (socket: SocketIOClient.Socket) => {
     Scene.change(Scene.Name.Game)
   })
 
-  socket.on('gamestate', (message: Message.GameState) => {
+  socket.on('gamestate', (message: Message.IGameState) => {
     Simulation.sync(app, message.sample)
   })
 
-  socket.on('goal', (message: Message.Goal) => {
+  socket.on('goal', (message: Message.IGoal) => {
     const playerId = message.id
     const health = message.health
 
-    Simulation.health(app, playerId, health)
+    Simulation.playerhealth(app, playerId, health)
     console.log('Goal on Player ', playerId)
   })
 
 }
 
-const reset = (app: State.App) => {
+const reset = (app: State.IApp) => {
   if (app.socket) { app.socket.disconnect() }
   if (app.game) { Simulation.destroy(app) }
 
@@ -104,5 +104,5 @@ $('#play').click(() =>  {
   const host = $('#host').val()
   const port = $('#port').val()
 
-  connect(app, name, host, port)
+  connect(globalApp, name, host, port)
 })

@@ -1,18 +1,21 @@
 import * as Matter from 'matter-js'
 import * as _ from 'lodash'
 import {
-  State,
-  Player,
-  Flipper,
-  Input,
-  FlipperState,
-  FlipperType,
+  IState,
+  IPlayer,
+  IFlipper,
+  IInput,
+  IFlipperState,
+  IFlipperType,
 } from './interface'
 
-const { CHARGE, SWING, READY, RESET } = FlipperState
-interface Velocities {linear: Matter.Vector, angular: number}
+const { CHARGE, SWING, READY, RESET } = IFlipperState
+interface IVelocities {
+  linear: Matter.Vector,
+  angular: number
+}
 
-export const input = (state: State, player: Player, input: Input) => {
+export const handleInput = (state: IState, player: IPlayer, input: IInput) => {
   const velocity = solvePlayer(state, player, input.horizontal)
 
   const lvelocities = solveFlipper(state, player.lflipper, input.lswing)
@@ -23,7 +26,7 @@ export const input = (state: State, player: Player, input: Input) => {
   resolveFlipperVelocity(player.rflipper, velocity, rvelocities)
 }
 
-const solvePlayer = (state: State, player: Player, horizontal: number) => {
+const solvePlayer = (state: IState, player: IPlayer, horizontal: number) => {
   const speed = state.config.player.speed * state.config.delta
 
   const direction = Matter.Vector.mult(player.right, horizontal)
@@ -42,9 +45,9 @@ const resolvePaddleVelocity = (
 }
 
 const resolveFlipperVelocity = (
-  flipper: Flipper,
+  flipper: IFlipper,
   velocity: Matter.Vector,
-  velocities: Velocities,
+  velocities: IVelocities,
 ) => {
   Matter.Body.setVelocity(flipper.body, Matter.Vector.add(
     velocity, velocities.linear,
@@ -58,13 +61,13 @@ const resolveFlipperVelocity = (
 
 const RAD_TO_DEG = 180 / Math.PI
 
-const toWorldAngle = (flipper: Flipper, angle: number) => {
+const toWorldAngle = (flipper: IFlipper, angle: number) => {
   const radianAngle = angle / RAD_TO_DEG
-  const flippedAngle = flipper.type === FlipperType.RIGHT ? radianAngle : -radianAngle
+  const flippedAngle = flipper.type === IFlipperType.RIGHT ? radianAngle : -radianAngle
   return flipper.baseAngle + flippedAngle
 }
 
-const toLocalAngle = (flipper: Flipper, angle: number) => {
+const toLocalAngle = (flipper: IFlipper, angle: number) => {
   const moduloAngle = ((angle - flipper.baseAngle) * RAD_TO_DEG) % 360
   const normalAngle =
       moduloAngle > 180
@@ -73,14 +76,14 @@ const toLocalAngle = (flipper: Flipper, angle: number) => {
     ? moduloAngle + 360
     : moduloAngle
 
-  return flipper.type === FlipperType.RIGHT ? normalAngle : - normalAngle
+  return flipper.type === IFlipperType.RIGHT ? normalAngle : - normalAngle
 }
 
 /****************************************
  * State Update Handlers
  ****************************************/
 
-type Handler = (state: State, flipper: Flipper) => number
+type Handler = (state: IState, flipper: IFlipper) => number
 
 const charge: Handler = (state, flipper) => {
   const angle = toLocalAngle(flipper, flipper.body.angle)
@@ -132,10 +135,10 @@ const handlers = {
 }
 
 const solveFlipper = (
-  state: State,
-  flipper: Flipper,
+  state: IState,
+  flipper: IFlipper,
   shouldSwing: boolean,
-): Velocities => {
+): IVelocities => {
   switch (flipper.state) {
     case READY:
       flipper.state = shouldSwing ? CHARGE : READY
@@ -162,12 +165,12 @@ const solveFlipper = (
 }
 
 const rotateFlipper = (
-  state: State,
-  flipper: Flipper,
+  state: IState,
+  flipper: IFlipper,
   angle: number,
-): Velocities => {
+): IVelocities => {
   const { width } = state.config.flipper
-  const isLeft = flipper.type === FlipperType.LEFT
+  const isLeft = flipper.type === IFlipperType.LEFT
 
   const direction = isLeft ? 1 : -1
   const gap = direction * width / 2

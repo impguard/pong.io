@@ -1,6 +1,6 @@
 import * as Game from '../../shared/game'
 
-export interface App {
+export interface IApp {
   socket: SocketIOClient.Socket
   server: {
     host: string
@@ -11,6 +11,6 @@ export interface App {
   accepted: boolean
 
   assignment: number
-  game: Game.State
+  game: Game.IState
   render: Matter.Render
 }

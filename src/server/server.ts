@@ -7,7 +7,7 @@ import * as fs from 'fs'
 import * as _ from 'lodash'
 import * as Simulation from './simulation'
 import * as Message from '../shared/message'
-import { Status, App } from './interface'
+import { Status, IApp } from './interface'
 import config from './config'
 
 /****************************************
@@ -50,7 +50,7 @@ const httpServer = http.createServer(koa.callback())
  ****************************************/
 
 const create = () => {
-  const app: App = {
+  const app: IApp = {
     status: Status.READY,
     inputs: {},
     game: null,
@@ -75,7 +75,7 @@ const create = () => {
         app.status = Status.PLAYING
       }, config.app.match.delay)
 
-      const startingMessage: Message.Starting = {
+      const startingMessage: Message.IStarting = {
         delay: config.app.match.delay,
       }
 
@@ -87,11 +87,11 @@ const create = () => {
   return app
 }
 
-const add = (app: App, socket: SocketIO.Socket) => {
+const add = (app: IApp, socket: SocketIO.Socket) => {
   const id = Simulation.assign(app)
 
   if (!id) {
-    const rejectMessage: Message.Reject = {
+    const rejectMessage: Message.IReject = {
       code: Message.ErrorCode.MATCHFULL,
     }
 
@@ -100,7 +100,7 @@ const add = (app: App, socket: SocketIO.Socket) => {
     return
   }
 
-  const acceptMessage: Message.Accept = {
+  const acceptMessage: Message.IAccept = {
     id,
     config: app.game.config,
     sample: Simulation.sampleInitial(app),
@@ -119,7 +119,7 @@ const add = (app: App, socket: SocketIO.Socket) => {
     }
   })
 
-  socket.on('input', (message: Message.Input) => {
+  socket.on('input', (message: Message.IInput) => {
     app.inputs[id] = message.input
   })
 }
@@ -128,7 +128,7 @@ const add = (app: App, socket: SocketIO.Socket) => {
  * Application Helpers
  ****************************************/
 
-const getPlayerCount = (app: App) => {
+const getPlayerCount = (app: IApp) => {
   return _.size(app.server.to('players').sockets.length)
 }
 
@@ -142,7 +142,7 @@ httpServer.listen(80, () => {
   Simulation.run(app)
 
   setInterval(() => {
-    const message: Message.GameState = {
+    const message: Message.IGameState = {
       sample: Simulation.sample(app),
     }
 

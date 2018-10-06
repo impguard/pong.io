@@ -1,6 +1,6 @@
 import * as Matter from 'matter-js'
 
-export interface Player {
+export interface IPlayer {
   composite: Matter.Composite
   basePosition: Matter.Vector
   baseAngle: number
@@ -8,33 +8,33 @@ export interface Player {
   right: Matter.Vector
   assigned: boolean
   paddle: Matter.Body
-  lflipper: Flipper
-  rflipper: Flipper
+  lflipper: IFlipper
+  rflipper: IFlipper
   goal?: [Matter.Vector, Matter.Vector]
   health: number
 }
 
-export enum FlipperType { RIGHT, LEFT }
+export enum IFlipperType { RIGHT, LEFT }
 
-export enum FlipperState { CHARGE, SWING, RESET, READY }
+export enum IFlipperState { CHARGE, SWING, RESET, READY }
 
-export interface Flipper {
+export interface IFlipper {
   body: Matter.Body
-  type: FlipperType
-  state: FlipperState
+  type: IFlipperType
+  state: IFlipperState
   basePosition: Matter.Vector
   baseAngle: number
 }
 
-export interface State {
+export interface IState {
   engine: Matter.Engine
-  config: Config
+  config: IConfig
   runner: {
     id?: any
     beforeTick: Array<() => void>,
   },
   players: {
-    [id: number]: Player,
+    [id: number]: IPlayer,
   }
   balls: {
     [id: number]: Matter.Body,
@@ -43,14 +43,14 @@ export interface State {
     [id: number]: Matter.Body,
   },
   flippers: {
-    [id: number]: Flipper,
+    [id: number]: IFlipper,
   }
   posts: {
     [id: number]: Matter.Body,
   }
 }
 
-export interface InitialSample {
+export interface ISampleInitial {
   players: {
     [id: number]: {
       x: number
@@ -70,17 +70,17 @@ export interface InitialSample {
   }
 }
 
-export interface FlipperSample {
+export interface ISampleFlipper {
   x: number
   y: number
   vx: number
   vy: number
   a: number
   va: number
-  s: FlipperState
+  s: IFlipperState
 }
 
-export interface Sample {
+export interface ISample {
   balls: {
     [id: number]: {
       x: number
@@ -97,24 +97,24 @@ export interface Sample {
         vx: number
         vy: number,
       }
-      lf: FlipperSample
-      rf: FlipperSample,
+      lf: ISampleFlipper
+      rf: ISampleFlipper,
     },
   }
 }
 
-export interface Goal {
+export interface IGoal {
   id: number
   health: number
 }
 
-export interface Input {
+export interface IInput {
   horizontal: number
   lswing: boolean
   rswing: boolean
 }
 
-export interface Config {
+export interface IConfig {
   numPlayers: number
   numBalls: number
   arena: {

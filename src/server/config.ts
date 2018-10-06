@@ -1,6 +1,6 @@
 import * as Game from '../shared/game'
 
-interface Config {
+interface IConfig {
   app: {
     network: {
       delta: number,
@@ -10,10 +10,10 @@ interface Config {
       delay: number,
     },
   }
-  game: Game.Config
+  game: Game.IConfig
 }
 
-const config: Config = {
+const config: IConfig = {
   game: {
     arena: {
       radius: 300,
