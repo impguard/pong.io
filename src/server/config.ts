@@ -1,22 +1,19 @@
-
 import * as Game from '../shared/game'
 
-
-interface Config {
+interface IConfig {
   app: {
     network: {
       delta: number,
     }
     match: {
+      playersRequired: number
       delay: number,
-      timeout: number,
     },
-  },
-  game: Game.Config,
+  }
+  game: Game.IConfig
 }
 
-
-const config: Config = {
+const config: IConfig = {
   game: {
     arena: {
       radius: 300,
@@ -67,8 +64,8 @@ const config: Config = {
       delta: 100,
     },
     match: {
+      playersRequired: 1,
       delay: 5000,
-      timeout: 300000,
     },
   },
 }

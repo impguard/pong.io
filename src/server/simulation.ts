@@ -2,12 +2,10 @@ import * as Matter from 'matter-js'
 import * as _ from 'lodash'
 import * as Game from '../shared/game'
 import * as Message from '../shared/message'
-import * as State from './state'
 import config from './config'
-import { FlipperSample } from '../shared/game';
+import { IApp, Status } from './interface'
 
-
-export const setup = (app: State.App) => {
+export const setup = (app: IApp) => {
   app.game =  Game.create(config.game)
 
   // Spawn the balls into the game
@@ -20,10 +18,10 @@ export const setup = (app: State.App) => {
   const radius = config.game.arena.radius
 
   // Spawn each goal post
-  const theta = 2 * Math.PI / numPlayers;
+  const theta = 2 * Math.PI / numPlayers
 
-  const posts = _.map(_.range(0, numPlayers), (number) => {
-    const angle = number * theta
+  const posts = _.map(_.range(0, numPlayers), (num) => {
+    const angle = num * theta
     const x = radius * Math.cos(angle)
     const y = radius * Math.sin(angle)
 
@@ -35,9 +33,9 @@ export const setup = (app: State.App) => {
   })
 
   // Spawn every player
-  _.times(numPlayers, (number) => {
-    const leftPost = posts[number]
-    const rightPost = posts[(number + 1) % numPlayers]
+  _.times(numPlayers, (num) => {
+    const leftPost = posts[num]
+    const rightPost = posts[(num + 1) % numPlayers]
 
     const x = (leftPost.position.x + rightPost.position.x) / 2
     const y = (leftPost.position.y + rightPost.position.y) / 2
@@ -55,16 +53,16 @@ export const setup = (app: State.App) => {
   Game.onBeforeTick(app.game, () => tick(app))
 }
 
-export const sample = (app: State.App): Game.Sample => {
+export const sample = (app: IApp): Game.ISample => {
   // May be worth optimizing this area of code
-  const balls = _.mapValues(app.game.balls, ball => ({
+  const balls = _.mapValues(app.game.balls, (ball) => ({
     x: ball.position.x,
     y: ball.position.y,
     vx: ball.velocity.x,
     vy: ball.velocity.y,
   }))
 
-  const players = _.mapValues(app.game.players, player => {
+  const players = _.mapValues(app.game.players, (player) => {
     return {
       p: {
         x: player.paddle.position.x,
@@ -80,7 +78,7 @@ export const sample = (app: State.App): Game.Sample => {
   return {balls, players}
 }
 
-const sampleFlipper = (flipper: Game.Flipper): Game.FlipperSample => {
+const sampleFlipper = (flipper: Game.IFlipper): Game.ISampleFlipper => {
   const { body } = flipper
 
   return {
@@ -94,14 +92,14 @@ const sampleFlipper = (flipper: Game.Flipper): Game.FlipperSample => {
   }
 }
 
-export const sampleInitial = (app: State.App): Game.InitialSample => {
-  const posts = _.mapValues(app.game.posts, posts => ({
-    x: posts.position.x,
-    y: posts.position.y,
-    a: posts.angle,
+export const sampleInitial = (app: IApp): Game.ISampleInitial => {
+  const posts = _.mapValues(app.game.posts, (post) => ({
+    x: post.position.x,
+    y: post.position.y,
+    a: post.angle,
   }))
 
-  const players = _.mapValues(app.game.players, player => ({
+  const players = _.mapValues(app.game.players, (player) => ({
     x: player.basePosition.x,
     y: player.basePosition.y,
     a: player.baseAngle,
@@ -113,52 +111,77 @@ export const sampleInitial = (app: State.App): Game.InitialSample => {
   return {posts, players}
 }
 
-
-export const tick = (app: State.App) => {
+export const tick = (app: IApp) => {
   _.forEach(app.game.balls, (ball: Matter.Body) => {
     handleBall(app, ball)
   })
 
   _.forEach(app.inputs, (input, id) => {
-    const player: Game.Player = app.game.players[id]
+    const player: Game.IPlayer = app.game.players[id]
     const isAlive = player.health > 0
 
-    if (isAlive) Game.input(app.game, player, input)
+    if (isAlive) { Game.handleInput(app.game, player, input) }
   })
 
   app.inputs = {}
 }
 
-
-export const assign = (app: State.App): number => {
+export const assign = (app: IApp): number => {
   const player = Game.assign(app.game)
   const id = player ? player.composite.id : null
   return id
 }
 
-
-export const input = (app: State.App, id: number, input: Game.Input) => {
+export const handleInput = (app: IApp, id: number, input: Game.IInput) => {
   const player = app.game.players[id]
-  Game.input(app.game, player, input)
+  Game.handleInput(app.game, player, input)
 }
 
+export const reset = (app: IApp) => {
+  _.forEach(app.game.balls, (ball: Matter.Body) => {
+    Game.resetBall(app.game, ball)
+  })
 
-export const run = (app: State.App) => {
+  _.forEach(app.game.players, (player) => {
+    const position = player.basePosition
+    const angle = player.baseAngle
+
+    Matter.Body.setPosition(player.paddle, position)
+    Matter.Body.setVelocity(player.paddle, Matter.Vector.create(0, 0))
+
+    resetFlipper(player.lflipper)
+    resetFlipper(player.rflipper)
+  })
+}
+
+const resetFlipper = (flipper: Game.IFlipper) => {
+  Matter.Body.setPosition(flipper.body, flipper.basePosition)
+  Matter.Body.setVelocity(flipper.body, Matter.Vector.create(0, 0))
+
+  Matter.Body.setAngle(flipper.body, flipper.baseAngle)
+  Matter.Body.setAngularVelocity(flipper.body, 0)
+
+  flipper.state = Game.IFlipperState.READY
+}
+
+export const run = (app: IApp) => {
   Game.run(app.game)
 }
-
 
 /****************************************
  * Gameplay Logic
  ****************************************/
 
-
-const handleBall = (app: State.App, ball: Matter.Body) => {
+const handleBall = (app: IApp, ball: Matter.Body) => {
   const distance = Matter.Vector.magnitude(ball.position)
-  const didScore = distance > app.game.config.arena.radius;
+  const didScore = distance > app.game.config.arena.radius
+  const didStart = app.status === Status.PLAYING
+
+  if (didScore && didStart) {
+      handleScore(app, ball)
+  }
 
   if (didScore) {
-      handleScore(app, ball);
       Game.resetBall(app.game, ball)
   }
 
@@ -166,7 +189,7 @@ const handleBall = (app: State.App, ball: Matter.Body) => {
   clampVelocity(app, ball, min, max)
 }
 
-const clampVelocity = (app: State.App, body: Matter.Body, min: number, max: number) => {
+const clampVelocity = (app: IApp, body: Matter.Body, min: number, max: number) => {
   const speed = Matter.Vector.magnitude(body.velocity)
   const clampedSpeed = _.clamp(speed, min, max)
   const direction = Matter.Vector.normalise(body.velocity)
@@ -175,25 +198,23 @@ const clampVelocity = (app: State.App, body: Matter.Body, min: number, max: numb
   Matter.Body.setVelocity(body, clampedVelocity)
 }
 
+const handleScore = (app: IApp, ball: Matter.Body) => {
+  _.forEach(app.game.players, (player) => {
+    if (player.health <= 0) { return }
 
-const handleScore = (app: State.App, ball: Matter.Body) => {
-  _.forEach(app.game.players, player => {
-    if (player.health <= 0) return
-
-    var didScore = lineSegmentsIntersect(
+    const didScore = lineSegmentsIntersect(
         Matter.Vector.create(0, 0), ball.position,
-        player.goal[0], player.goal[1]
-    );
+        player.goal[0], player.goal[1],
+    )
 
     if (didScore) {
-      score(app, ball, player);
+      score(app, ball, player)
     }
   })
 }
 
-
-const score = (app: State.App, ball: Matter.Body, player: Game.Player) => {
-  player.health -= app.game.config.ball.damage;
+const score = (app: IApp, ball: Matter.Body, player: Game.IPlayer) => {
+  player.health -= app.game.config.ball.damage
 
   app.server.to('players').emit('goal', {
     id: player.composite.id,
@@ -203,10 +224,9 @@ const score = (app: State.App, ball: Matter.Body, player: Game.Player) => {
   const isDead = player.health <= 0
 
   if (isDead) {
-    console.log('Player is dead')
+    console.log(`Player ${player.composite.id} is dead!`)
   }
 }
-
 
 const lineSegmentsIntersect = (
   p1: Matter.Vector,
@@ -218,6 +238,6 @@ const lineSegmentsIntersect = (
   const u = ((q1.x - p1.x) * (q2.y - q1.y) - (q1.y - p1.y) * (q2.x - q1.x)) / d
   const v = ((q1.x - p1.x) * (p2.y - p1.y) - (q1.y - p1.y) * (p2.x - p1.x)) / d
 
-  const didIntersect = !(d == 0.0 || u < 0.0 || u > 1.0 || v < 0.0 || v > 1.0)
+  const didIntersect = !(d === 0.0 || u < 0.0 || u > 1.0 || v < 0.0 || v > 1.0)
   return didIntersect
 }

@@ -1,13 +1,12 @@
-import * as Matter from 'matter-js';
+import * as Matter from 'matter-js'
 import * as _ from 'lodash'
-import { State, FlipperType, FlipperState } from './interface'
-
+import { IState, IFlipperType, IFlipperState } from './interface'
 
 interface ISpawnBallOptions {
-  id?: number
+  id?: number,
 }
 
-export const spawnBall = (state: State, options?: ISpawnBallOptions) => {
+export const spawnBall = (state: IState, options?: ISpawnBallOptions) => {
   const ball = Matter.Bodies.polygon(
     0, 0,
     state.config.ball.sides,
@@ -22,7 +21,7 @@ export const spawnBall = (state: State, options?: ISpawnBallOptions) => {
         category: 1,
         mask: ~0 << 1,
       },
-      ...options
+      ...options,
   })
 
   Matter.World.add(state.engine.world, ball)
@@ -32,17 +31,16 @@ export const spawnBall = (state: State, options?: ISpawnBallOptions) => {
 }
 
 interface ISpawnPlayerOptions {
-  id?: number
-  paddleId?: number
-  lflipperId?: number
-  rflipperId?: number
-  position: Matter.Vector
-  angle: number
-  goal?: [Matter.Vector, Matter.Vector]
+  id?: number,
+  paddleId?: number,
+  lflipperId?: number,
+  rflipperId?: number,
+  position: Matter.Vector,
+  angle: number,
+  goal?: [Matter.Vector, Matter.Vector],
 }
 
-
-export const spawnPlayer = (state: State, options: ISpawnPlayerOptions) => {
+export const spawnPlayer = (state: IState, options: ISpawnPlayerOptions) => {
   const paddle = spawnPaddle(state, {
     ...(options.paddleId && { id: options.paddleId }),
     position: options.position,
@@ -57,25 +55,25 @@ export const spawnPlayer = (state: State, options: ISpawnPlayerOptions) => {
 
   const lfposition = Matter.Vector.add(
     options.position,
-    Matter.Vector.mult(right, -fspacing)
+    Matter.Vector.mult(right, -fspacing),
   )
   const rfposition = Matter.Vector.add(
     options.position,
-    Matter.Vector.mult(right, fspacing)
+    Matter.Vector.mult(right, fspacing),
   )
 
   const lflipper = spawnFlipper(state, {
     ...(options.lflipperId && { id: options.lflipperId }),
     position: lfposition,
     angle: options.angle,
-    type: FlipperType.LEFT,
+    type: IFlipperType.LEFT,
   })
 
   const rflipper = spawnFlipper(state, {
     ...(options.rflipperId && { id: options.rflipperId }),
     position: rfposition,
     angle: options.angle,
-    type: FlipperType.RIGHT,
+    type: IFlipperType.RIGHT,
   })
 
   const player = Matter.Composite.create({
@@ -107,7 +105,7 @@ interface ISpawnPaddleOptions {
   angle: number
 }
 
-const spawnPaddle = (state: State, options: ISpawnPaddleOptions) => {
+const spawnPaddle = (state: IState, options: ISpawnPaddleOptions) => {
   const { width, height } = state.config.paddle
   const paddle = Matter.Bodies.rectangle(0, 0, width, height, {
     isStatic: true,
@@ -124,12 +122,12 @@ const spawnPaddle = (state: State, options: ISpawnPaddleOptions) => {
 
 interface ISpawnFlipperOptions {
   id?: number
-  type: FlipperType
+  type: IFlipperType
   position: Matter.Vector
   angle: number
 }
 
-const spawnFlipper = (state: State, options: ISpawnFlipperOptions) => {
+const spawnFlipper = (state: IState, options: ISpawnFlipperOptions) => {
   const bodyOptions = _.omit(options, 'type')
   const { width, height } = state.config.flipper
 
@@ -140,14 +138,15 @@ const spawnFlipper = (state: State, options: ISpawnFlipperOptions) => {
       category: 2,
       mask: ~0,
     },
-    ...bodyOptions
+    ...bodyOptions,
   })
 
   const flipper = {
     body,
-    state: FlipperState.READY,
+    state: IFlipperState.READY,
     type: options.type,
     baseAngle: options.angle,
+    basePosition: options.position,
   }
   state.flippers[flipper.body.id] = flipper
 
@@ -160,7 +159,7 @@ interface ISpawnPostOptions {
   angle: number
 }
 
-export const spawnPost = (state: State, options: ISpawnPostOptions) =>  {
+export const spawnPost = (state: IState, options: ISpawnPostOptions) =>  {
   const { width, height } = state.config.post
   const post = Matter.Bodies.rectangle(0, 0, width, height, {
     isStatic: true,

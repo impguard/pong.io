@@ -1,7 +1,7 @@
-import * as Matter from 'matter-js';
+import * as Matter from 'matter-js'
 import * as _ from 'lodash'
 
-import { Config, State } from './interface'
+import { IConfig, IState } from './interface'
 
 export * from './interface'
 export * from './spawn'
@@ -11,11 +11,11 @@ export * from './input'
  * Lifecycle Functions
  ****************************************/
 
-export const create = (config: Config): State => {
+export const create = (config: IConfig): IState => {
   const world = Matter.World.create({
     gravity: {
-      scale: 0, x: 0, y: 0
-    }
+      scale: 0, x: 0, y: 0,
+    },
   })
 
   const engine = Matter.Engine.create({world})
@@ -30,26 +30,23 @@ export const create = (config: Config): State => {
     posts: {},
     runner: {
       beforeTick: [],
-    }
+    },
   }
 }
 
-
-export const run = (state: State) =>  {
+export const run = (state: IState) =>  {
   state.runner.id = setInterval(() => {
-    _.forEach(state.runner.beforeTick, callback => callback())
+    _.forEach(state.runner.beforeTick, (callback) => callback())
 
     Matter.Engine.update(state.engine, state.config.delta)
   }, state.config.delta)
 }
 
-
-export const stop = (state: State) => {
+export const stop = (state: IState) => {
   clearInterval(state.runner.id)
 }
 
-
-export const destroy = (state: State) => {
+export const destroy = (state: IState) => {
   Matter.Engine.clear(state.engine)
 }
 
@@ -57,8 +54,8 @@ export const destroy = (state: State) => {
  * Game Logic Helpers
  ****************************************/
 
-export const assign = (state: State) => {
-  const player = _.find(state.players, player => !player.assigned)
+export const assign = (state: IState) => {
+  const player = _.find(state.players, (p) => !p.assigned)
 
   if (player) {
     player.assigned = true
@@ -67,7 +64,7 @@ export const assign = (state: State) => {
   return player
 }
 
-export const resetBall = (state: State, ball: Matter.Body) => {
+export const resetBall = (state: IState, ball: Matter.Body) => {
   const x = 2 * Math.random() - 1
   const y = 2 * Math.random() - 1
 
@@ -82,6 +79,6 @@ export const resetBall = (state: State, ball: Matter.Body) => {
  * Events Registrators
  ****************************************/
 
-export const onBeforeTick = (state: State, callback: () => void) => {
+export const onBeforeTick = (state: IState, callback: () => void) => {
   state.runner.beforeTick.push(callback)
 }

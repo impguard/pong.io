@@ -1,161 +1,161 @@
 import * as Matter from 'matter-js'
 
-
-export interface Player {
-  composite: Matter.Composite
-  basePosition: Matter.Vector
-  baseAngle: number
-  up: Matter.Vector
-  right: Matter.Vector
-  assigned: boolean
-  paddle: Matter.Body
-  lflipper: Flipper
-  rflipper: Flipper
-  goal?: [Matter.Vector, Matter.Vector]
-  health: number
+export interface IPlayer {
+  composite: Matter.Composite,
+  basePosition: Matter.Vector,
+  baseAngle: number,
+  up: Matter.Vector,
+  right: Matter.Vector,
+  assigned: boolean,
+  paddle: Matter.Body,
+  lflipper: IFlipper,
+  rflipper: IFlipper,
+  goal?: [Matter.Vector, Matter.Vector],
+  health: number,
 }
 
-export enum FlipperType { RIGHT, LEFT }
+export enum IFlipperType { RIGHT, LEFT }
 
-export enum FlipperState { CHARGE, SWING, RESET, READY }
+export enum IFlipperState { CHARGE, SWING, RESET, READY }
 
-export interface Flipper {
-  body: Matter.Body
-  type: FlipperType
-  state: FlipperState
-  baseAngle: number
+export interface IFlipper {
+  body: Matter.Body,
+  type: IFlipperType,
+  state: IFlipperState,
+  basePosition: Matter.Vector,
+  baseAngle: number,
 }
 
-export interface State {
+export interface IState {
   engine: Matter.Engine,
-  config: Config
+  config: IConfig,
   runner: {
     id?: any,
-    beforeTick: (() => void)[],
+    beforeTick: Array<() => void>,
   },
   players: {
-    [id: number]: Player
+    [id: number]: IPlayer,
   }
   balls: {
-    [id: number]: Matter.Body
+    [id: number]: Matter.Body,
   },
   paddles: {
-    [id: number]: Matter.Body
+    [id: number]: Matter.Body,
   },
   flippers: {
-    [id: number]: Flipper
+    [id: number]: IFlipper,
   }
   posts: {
-    [id: number]: Matter.Body
+    [id: number]: Matter.Body,
   }
 }
 
-export interface InitialSample {
+export interface ISampleInitial {
   players: {
     [id: number]: {
-      x: number
-      y: number
-      a: number
-      p: number
-      lf: number
-      rf: number
-    }
+      x: number,
+      y: number,
+      a: number,
+      p: number,
+      lf: number,
+      rf: number,
+    },
   },
   posts: {
     [id: number]: {
-      x: number
-      y: number
-      a: number
-    }
-  }
+      x: number,
+      y: number,
+      a: number,
+    },
+  },
 }
 
-export interface FlipperSample {
-  x: number
-  y: number
-  vx: number
-  vy: number
-  a: number
-  va: number
-  s: FlipperState
+export interface ISampleFlipper {
+  x: number,
+  y: number,
+  vx: number,
+  vy: number,
+  a: number,
+  va: number,
+  s: IFlipperState,
 }
 
-export interface Sample {
+export interface ISample {
   balls: {
     [id: number]: {
-      x: number
-      y: number
-      vx: number
-      vy: number
-    }
-  }
+      x: number,
+      y: number,
+      vx: number,
+      vy: number,
+    },
+  },
   players: {
     [id: number]: {
       p: {
-        x: number
-        y: number
-        vx: number
-        vy: number
-      }
-      lf: FlipperSample
-      rf: FlipperSample
-    }
-  }
+        x: number,
+        y: number,
+        vx: number,
+        vy: number,
+      },
+      lf: ISampleFlipper,
+      rf: ISampleFlipper,
+    },
+  },
 }
 
-export interface Goal {
-  id: number
-  health: number
+export interface IGoal {
+  id: number,
+  health: number,
 }
 
-export interface Input {
-  horizontal: number
-  lswing: boolean
-  rswing: boolean
+export interface IInput {
+  horizontal: number,
+  lswing: boolean,
+  rswing: boolean,
 }
 
-export interface Config {
-  numPlayers: number
-  numBalls: number
+export interface IConfig {
+  numPlayers: number,
+  numBalls: number,
   arena: {
-    radius: number
+    radius: number,
   },
   post: {
-    width: number
-    height: number
-  }
+    width: number,
+    height: number,
+  },
   player: {
-    speed: number
-    health: number
-  }
+    speed: number,
+    health: number,
+  },
   paddle: {
-    width: number
-    height: number
-  }
+    width: number,
+    height: number,
+  },
   flipper: {
-    width: number
-    height: number
-    spacing: number
+    width: number,
+    height: number,
+    spacing: number,
     charge: {
-      speed: number
-      angle: number
-    }
+      speed: number,
+      angle: number,
+    },
     swing: {
-      speed: number
-      angle: number
-    }
+      speed: number,
+      angle: number,
+    },
     reset: {
-      speed: number
-    }
-  }
+      speed: number,
+    },
+  },
   ball: {
     speed: {
-      min: number
-      max: number
-    }
-    damage: number
-    radius: number
-    sides: number
-  }
-  delta: number
+      min: number,
+      max: number,
+    },
+    damage: number,
+    radius: number,
+    sides: number,
+  },
+  delta: number,
 }

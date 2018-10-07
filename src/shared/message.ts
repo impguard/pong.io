@@ -2,25 +2,29 @@ import * as Game from './game'
 
 export enum ErrorCode { MATCHFULL }
 
-export interface Accept {
+export interface IAccept {
   id: number
-  config: Game.Config
-  sample: Game.InitialSample
+  config: Game.IConfig
+  sample: Game.ISampleInitial
 }
 
-export interface Reject {
+export interface IReject {
   code: ErrorCode
 }
 
-export interface Goal {
+export interface IGoal {
   id: number
   health: number
 }
 
-export interface GameState {
-  sample: Game.Sample
+export interface IGameState {
+  sample: Game.ISample
 }
 
-export interface Input {
-  input: Game.Input
+export interface IStarting {
+  delay: number
+}
+
+export interface IInput {
+  input: Game.IInput
 }

@@ -1,18 +1,21 @@
 import * as Matter from 'matter-js'
 import * as _ from 'lodash'
-import { 
-  State, 
-  Player, 
-  Flipper, 
-  Input, 
-  FlipperState, 
-  FlipperType 
+import {
+  IState,
+  IPlayer,
+  IFlipper,
+  IInput,
+  IFlipperState,
+  IFlipperType,
 } from './interface'
 
-const { CHARGE, SWING, READY, RESET } = FlipperState
-type Velocities = {linear: Matter.Vector, angular: number}
+const { CHARGE, SWING, READY, RESET } = IFlipperState
+interface IVelocities {
+  linear: Matter.Vector,
+  angular: number
+}
 
-export const input = (state: State, player: Player, input: Input) => {
+export const handleInput = (state: IState, player: IPlayer, input: IInput) => {
   const velocity = solvePlayer(state, player, input.horizontal)
 
   const lvelocities = solveFlipper(state, player.lflipper, input.lswing)
@@ -23,7 +26,7 @@ export const input = (state: State, player: Player, input: Input) => {
   resolveFlipperVelocity(player.rflipper, velocity, rvelocities)
 }
 
-const solvePlayer = (state: State, player: Player, horizontal: number) => {
+const solvePlayer = (state: IState, player: IPlayer, horizontal: number) => {
   const speed = state.config.player.speed * state.config.delta
 
   const direction = Matter.Vector.mult(player.right, horizontal)
@@ -35,19 +38,19 @@ const solvePlayer = (state: State, player: Player, horizontal: number) => {
 }
 
 const resolvePaddleVelocity = (
-  paddle: Matter.Body, 
+  paddle: Matter.Body,
   velocity: Matter.Vector,
 ) => {
   Matter.Body.setVelocity(paddle, velocity)
 }
 
 const resolveFlipperVelocity = (
-  flipper: Flipper,
+  flipper: IFlipper,
   velocity: Matter.Vector,
-  velocities: Velocities,
+  velocities: IVelocities,
 ) => {
   Matter.Body.setVelocity(flipper.body, Matter.Vector.add(
-    velocity, velocities.linear
+    velocity, velocities.linear,
   ))
   Matter.Body.setAngularVelocity(flipper.body, velocities.angular)
 }
@@ -58,29 +61,29 @@ const resolveFlipperVelocity = (
 
 const RAD_TO_DEG = 180 / Math.PI
 
-const toWorldAngle = (flipper: Flipper, angle: number) => {
+const toWorldAngle = (flipper: IFlipper, angle: number) => {
   const radianAngle = angle / RAD_TO_DEG
-  const flippedAngle = flipper.type === FlipperType.RIGHT ? radianAngle : -radianAngle
+  const flippedAngle = flipper.type === IFlipperType.RIGHT ? radianAngle : -radianAngle
   return flipper.baseAngle + flippedAngle
 }
 
-const toLocalAngle = (flipper: Flipper, angle: number) => {
-  const moduloAngle = ((angle - flipper.baseAngle) * RAD_TO_DEG) % 360;
+const toLocalAngle = (flipper: IFlipper, angle: number) => {
+  const moduloAngle = ((angle - flipper.baseAngle) * RAD_TO_DEG) % 360
   const normalAngle =
       moduloAngle > 180
     ? moduloAngle - 360
     : moduloAngle < -180
     ? moduloAngle + 360
-    : moduloAngle;
+    : moduloAngle
 
-  return flipper.type === FlipperType.RIGHT ? normalAngle : - normalAngle
+  return flipper.type === IFlipperType.RIGHT ? normalAngle : - normalAngle
 }
 
 /****************************************
  * State Update Handlers
  ****************************************/
 
-type Handler = (state: State, flipper: Flipper) => number
+type Handler = (state: IState, flipper: IFlipper) => number
 
 const charge: Handler = (state, flipper) => {
   const angle = toLocalAngle(flipper, flipper.body.angle)
@@ -101,7 +104,7 @@ const swing: Handler = (state, flipper) => {
   const clampAngle = _.clamp(
     basisAngle,
     state.config.flipper.charge.angle,
-    state.config.flipper.swing.angle
+    state.config.flipper.swing.angle,
   )
 
   if (clampAngle === state.config.flipper.swing.angle) {
@@ -115,7 +118,7 @@ const reset: Handler = (state, flipper) => {
   const angle = toLocalAngle(flipper, flipper.body.angle)
 
   const delta = state.config.flipper.reset.speed * state.config.delta
-  const basisAngle = angle - delta;
+  const basisAngle = angle - delta
   const clampAngle = _.clamp(basisAngle, 0, state.config.flipper.swing.angle)
 
   if (clampAngle === 0) {
@@ -132,10 +135,10 @@ const handlers = {
 }
 
 const solveFlipper = (
-  state: State, 
-  flipper: Flipper, 
+  state: IState,
+  flipper: IFlipper,
   shouldSwing: boolean,
-): Velocities => {
+): IVelocities => {
   switch (flipper.state) {
     case READY:
       flipper.state = shouldSwing ? CHARGE : READY
@@ -148,7 +151,7 @@ const solveFlipper = (
   if (flipper.state === READY) {
     return {
       angular: 0,
-      linear: Matter.Vector.create(0, 0)
+      linear: Matter.Vector.create(0, 0),
     }
   }
 
@@ -162,24 +165,24 @@ const solveFlipper = (
 }
 
 const rotateFlipper = (
-  state: State, 
-  flipper: Flipper, 
+  state: IState,
+  flipper: IFlipper,
   angle: number,
-): Velocities => {
+): IVelocities => {
   const { width } = state.config.flipper
-  const isLeft = flipper.type === FlipperType.LEFT
+  const isLeft = flipper.type === IFlipperType.LEFT
 
   const direction = isLeft ? 1 : -1
   const gap = direction * width / 2
 
   const right = Matter.Vector.rotate(
     Matter.Vector.create(1, 0),
-    flipper.body.angle
+    flipper.body.angle,
   )
 
   const point = Matter.Vector.add(
     flipper.body.position,
-    Matter.Vector.mult(right, gap)
+    Matter.Vector.mult(right, gap),
   )
 
   const cos = Math.cos(angle)
@@ -193,18 +196,18 @@ const rotateFlipper = (
 
   const linear = Matter.Vector.create(
     nx - flipper.body.position.x,
-    ny - flipper.body.position.y
+    ny - flipper.body.position.y,
   )
 
   Matter.Body.setPosition(flipper.body, {
       x: point.x + (dx * cos - dy * sin),
-      y: point.y + (dx * sin + dy * cos)
+      y: point.y + (dx * sin + dy * cos),
   })
 
   Matter.Body.rotate(flipper.body, angle)
 
   return {
     linear,
-    angular: angle
+    angular: angle,
   }
 }

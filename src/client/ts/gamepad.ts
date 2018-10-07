@@ -2,7 +2,6 @@ import * as $ from 'jquery'
 import * as _ from 'lodash'
 import * as Game from '../../shared/game'
 
-
 const keys = {
   left: 0,
   right: 0,
@@ -10,8 +9,8 @@ const keys = {
   k: false,
 }
 
-export const sample = (): Game.Input => {
-  const input: Game.Input = {
+export const sample = (): Game.IInput => {
+  const input: Game.IInput = {
     horizontal: keys.right - keys.left,
     lswing: keys.j,
     rswing: keys.k,
@@ -20,10 +19,10 @@ export const sample = (): Game.Input => {
   return input
 }
 
-$(window).keydown(event => {
+$(window).keydown((event) => {
   const { keyCode } = event
 
-  switch(keyCode) {
+  switch (keyCode) {
     case 68:
       keys.right = 1
       break
@@ -45,10 +44,10 @@ $(window).keydown(event => {
   }
 })
 
-$(window).keyup(event => {
+$(window).keyup((event) => {
   const { keyCode } = event
 
-  switch(keyCode) {
+  switch (keyCode) {
     case 68:
       keys.right = 0
       break
