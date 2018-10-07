@@ -56,7 +56,6 @@ export const setup = (app: IApp) => {
 }
 
 const setupCover = (app: IApp, player: IPlayer) => {
-  console.log("Setting up goal cover")
   const position = player.basePosition
   const angle = player.baseAngle
 
