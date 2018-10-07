@@ -3,7 +3,7 @@ import * as _ from 'lodash'
 import { IState, IFlipperType, IFlipperState } from './interface'
 
 interface ISpawnBallOptions {
-  id?: number
+  id?: number,
 }
 
 export const spawnBall = (state: IState, options?: ISpawnBallOptions) => {
@@ -31,13 +31,13 @@ export const spawnBall = (state: IState, options?: ISpawnBallOptions) => {
 }
 
 interface ISpawnPlayerOptions {
-  id?: number
-  paddleId?: number
-  lflipperId?: number
-  rflipperId?: number
-  position: Matter.Vector
-  angle: number
-  goal?: [Matter.Vector, Matter.Vector]
+  id?: number,
+  paddleId?: number,
+  lflipperId?: number,
+  rflipperId?: number,
+  position: Matter.Vector,
+  angle: number,
+  goal?: [Matter.Vector, Matter.Vector],
 }
 
 export const spawnPlayer = (state: IState, options: ISpawnPlayerOptions) => {

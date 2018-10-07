@@ -1,17 +1,17 @@
 import * as Matter from 'matter-js'
 
 export interface IPlayer {
-  composite: Matter.Composite
-  basePosition: Matter.Vector
-  baseAngle: number
-  up: Matter.Vector
-  right: Matter.Vector
-  assigned: boolean
-  paddle: Matter.Body
-  lflipper: IFlipper
-  rflipper: IFlipper
-  goal?: [Matter.Vector, Matter.Vector]
-  health: number
+  composite: Matter.Composite,
+  basePosition: Matter.Vector,
+  baseAngle: number,
+  up: Matter.Vector,
+  right: Matter.Vector,
+  assigned: boolean,
+  paddle: Matter.Body,
+  lflipper: IFlipper,
+  rflipper: IFlipper,
+  goal?: [Matter.Vector, Matter.Vector],
+  health: number,
 }
 
 export enum IFlipperType { RIGHT, LEFT }
@@ -19,18 +19,18 @@ export enum IFlipperType { RIGHT, LEFT }
 export enum IFlipperState { CHARGE, SWING, RESET, READY }
 
 export interface IFlipper {
-  body: Matter.Body
-  type: IFlipperType
-  state: IFlipperState
-  basePosition: Matter.Vector
-  baseAngle: number
+  body: Matter.Body,
+  type: IFlipperType,
+  state: IFlipperState,
+  basePosition: Matter.Vector,
+  baseAngle: number,
 }
 
 export interface IState {
-  engine: Matter.Engine
-  config: IConfig
+  engine: Matter.Engine,
+  config: IConfig,
   runner: {
-    id?: any
+    id?: any,
     beforeTick: Array<() => void>,
   },
   players: {
@@ -53,109 +53,109 @@ export interface IState {
 export interface ISampleInitial {
   players: {
     [id: number]: {
-      x: number
-      y: number
-      a: number
-      p: number
-      lf: number
+      x: number,
+      y: number,
+      a: number,
+      p: number,
+      lf: number,
       rf: number,
     },
   },
   posts: {
     [id: number]: {
-      x: number
-      y: number
+      x: number,
+      y: number,
       a: number,
     },
-  }
+  },
 }
 
 export interface ISampleFlipper {
-  x: number
-  y: number
-  vx: number
-  vy: number
-  a: number
-  va: number
-  s: IFlipperState
+  x: number,
+  y: number,
+  vx: number,
+  vy: number,
+  a: number,
+  va: number,
+  s: IFlipperState,
 }
 
 export interface ISample {
   balls: {
     [id: number]: {
-      x: number
-      y: number
-      vx: number
+      x: number,
+      y: number,
+      vx: number,
       vy: number,
     },
-  }
+  },
   players: {
     [id: number]: {
       p: {
-        x: number
-        y: number
-        vx: number
+        x: number,
+        y: number,
+        vx: number,
         vy: number,
-      }
-      lf: ISampleFlipper
+      },
+      lf: ISampleFlipper,
       rf: ISampleFlipper,
     },
-  }
+  },
 }
 
 export interface IGoal {
-  id: number
-  health: number
+  id: number,
+  health: number,
 }
 
 export interface IInput {
-  horizontal: number
-  lswing: boolean
-  rswing: boolean
+  horizontal: number,
+  lswing: boolean,
+  rswing: boolean,
 }
 
 export interface IConfig {
-  numPlayers: number
-  numBalls: number
+  numPlayers: number,
+  numBalls: number,
   arena: {
     radius: number,
   },
   post: {
-    width: number
+    width: number,
     height: number,
-  }
+  },
   player: {
-    speed: number
+    speed: number,
     health: number,
-  }
+  },
   paddle: {
-    width: number
+    width: number,
     height: number,
-  }
+  },
   flipper: {
-    width: number
-    height: number
-    spacing: number
+    width: number,
+    height: number,
+    spacing: number,
     charge: {
-      speed: number
+      speed: number,
       angle: number,
-    }
+    },
     swing: {
-      speed: number
+      speed: number,
       angle: number,
-    }
+    },
     reset: {
       speed: number,
     },
-  }
+  },
   ball: {
     speed: {
-      min: number
+      min: number,
       max: number,
-    }
-    damage: number
-    radius: number
+    },
+    damage: number,
+    radius: number,
     sides: number,
-  }
-  delta: number
+  },
+  delta: number,
 }
