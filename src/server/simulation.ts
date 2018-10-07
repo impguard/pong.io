@@ -3,6 +3,7 @@ import * as _ from 'lodash'
 import * as Game from '../shared/game'
 import * as Message from '../shared/message'
 import config from './config'
+import event from '../shared/event'
 import { IApp, Status } from './interface'
 import { IPlayer } from '../shared/game';
 
@@ -51,7 +52,7 @@ export const setup = (app: IApp) => {
     })
   })
 
-  Game.onBeforeTick(app.game, () => tick(app))
+  event.on('beforeTick', () => tick(app))
 }
 
 const setupCover = (app: IApp, player: IPlayer) => {
@@ -121,18 +122,21 @@ export const sampleInitial = (app: IApp): Game.ISampleInitial => {
 }
 
 export const tick = (app: IApp) => {
+  const { min, max } = app.game.config.ball.speed
+
   _.forEach(app.game.balls, (ball: Matter.Body) => {
     handleBall(app, ball)
+    Game.clampBall(ball, min, max)
   })
 
   _.forEach(app.inputs, (input, id) => {
     const player: Game.IPlayer = app.game.players[id]
     const isAlive = player.health > 0
 
-    if (isAlive) { Game.handleInput(app.game, player, input) }
+    if (isAlive) {
+      Game.handleInput(app.game, player, input)
+    }
   })
-
-  Game.tick(app.game)
 
   app.inputs = {}
 }
@@ -186,15 +190,38 @@ export const run = (app: IApp) => {
 const handleBall = (app: IApp, ball: Matter.Body) => {
   const distance = Matter.Vector.magnitude(ball.position)
   const didScore = distance > app.game.config.arena.radius
-  const didStart = app.status === Status.PLAYING
+  const isPlaying = app.status === Status.PLAYING
 
-  if (didScore && didStart) {
+  if (didScore && isPlaying) {
       handleScore(app, ball)
+      checkGameOver(app)
   }
 
   if (didScore) {
       Game.resetBall(app.game, ball)
   }
+}
+
+/**
+ * Checks if the game is over.
+ *
+ * Note that it is expected that there will always be a positive number of
+ * survivors. This function avoids the "no winner" problem by assuming that the
+ * game design ensures that this cannot happen, eg. always have one less ball
+ * than the number of players or checking game over after every individual ball
+ * score.
+ */
+export const checkGameOver = (app: IApp) => {
+  const survivors = _.filter(app.game.players, (player) => player.health > 0)
+  const winner = _.size(survivors) <= 1
+    ? _.first(survivors)
+    : undefined
+
+  if (!winner) {
+    return
+  }
+
+  event.emit('gameOver', winner.composite.id)
 }
 
 const handleScore = (app: IApp, ball: Matter.Body) => {

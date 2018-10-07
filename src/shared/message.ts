@@ -1,6 +1,6 @@
 import * as Game from './game'
 
-export enum ErrorCode { MATCHFULL }
+export enum ErrorCode { MATCHFULL, MATCHSTARTED }
 
 export interface IAccept {
   id: number
@@ -31,4 +31,8 @@ export interface IStarting {
 
 export interface IInput {
   input: Game.IInput
+}
+
+export interface IGameOver {
+  winner: number
 }

@@ -1,6 +1,7 @@
 import * as Matter from 'matter-js'
 import * as _ from 'lodash'
 
+import event from '../event'
 import { IConfig, IState } from './interface'
 
 export * from './interface'
@@ -29,15 +30,13 @@ export const create = (config: IConfig): IState => {
     flippers: {},
     posts: {},
     covers: {},
-    runner: {
-      beforeTick: [],
-    },
+    runner: {},
   }
 }
 
 export const run = (state: IState) =>  {
   state.runner.id = setInterval(() => {
-    _.forEach(state.runner.beforeTick, (callback) => callback())
+    event.emit('beforeTick')
 
     Matter.Engine.update(state.engine, state.config.delta)
   }, state.config.delta)
@@ -54,14 +53,6 @@ export const destroy = (state: IState) => {
 /****************************************
  * Game Logic Helpers
  ****************************************/
-
-export const tick = (state: IState) => {
-  const { min, max } = state.config.ball.speed
-
-  _.forEach(state.balls, (ball) => {
-    clampBall(ball, min, max)
-  })
-}
 
 export const assign = (state: IState) => {
   const player = _.find(state.players, (p) => !p.assigned)
@@ -84,19 +75,11 @@ export const resetBall = (state: IState, ball: Matter.Body) => {
   Matter.Body.setVelocity(ball, velocity)
 }
 
-const clampBall = (ball: Matter.Body, min: number, max: number) => {
+export const clampBall = (ball: Matter.Body, min: number, max: number) => {
   const speed = Matter.Vector.magnitude(ball.velocity)
   const clampedSpeed = _.clamp(speed, min, max)
   const direction = Matter.Vector.normalise(ball.velocity)
   const clampedVelocity = Matter.Vector.mult(direction, clampedSpeed)
 
   Matter.Body.setVelocity(ball, clampedVelocity)
-}
-
-/****************************************
- * Events Registrators
- ****************************************/
-
-export const onBeforeTick = (state: IState, callback: () => void) => {
-  state.runner.beforeTick.push(callback)
 }

@@ -8,6 +8,7 @@ import * as _ from 'lodash'
 import * as Simulation from './simulation'
 import * as Message from '../shared/message'
 import { Status, IApp } from './interface'
+import event from '../shared/event'
 import config from './config'
 
 /****************************************
@@ -58,10 +59,19 @@ const create = () => {
     server: io(httpServer),
   }
 
+  event.on('gameOver', (winner: number) => {
+    gameOver(app, winner)
+  })
+
   Simulation.setup(app)
 
   app.server.on('connection', (socket) => {
-    add(app, socket)
+    const didAdd = add(app, socket)
+
+    if (!didAdd) {
+      console.log('Rejected player')
+      return
+    }
 
     const numPlayers = getPlayerCount(app)
     const { playersRequired } = config.app.match
@@ -84,6 +94,16 @@ const create = () => {
 }
 
 const add = (app: IApp, socket: SocketIO.Socket) => {
+  if (app.status !== Status.READY) {
+    const rejectMessage: Message.IReject = {
+      code: Message.ErrorCode.MATCHSTARTED,
+    }
+
+    socket.emit('rejected', rejectMessage)
+    socket.disconnect()
+    return false
+  }
+
   const id = Simulation.assign(app)
 
   if (!id) {
@@ -93,7 +113,7 @@ const add = (app: IApp, socket: SocketIO.Socket) => {
 
     socket.emit('rejected', rejectMessage)
     socket.disconnect()
-    return
+    return false
   }
 
   const acceptMessage: Message.IAccept = {
@@ -119,6 +139,8 @@ const add = (app: IApp, socket: SocketIO.Socket) => {
   socket.on('input', (message: Message.IInput) => {
     app.inputs[id] = message.input
   })
+
+  return true
 }
 
 /****************************************
@@ -136,11 +158,24 @@ const start = (app: IApp) => {
 const stop = (app: IApp) => {
   console.log('Game is shutting down in 10s')
 
+  app.status = Status.STOPPING
+
   setTimeout(() => {
-    httpServer.close(() => {
-      process.exit(0)
+    app.server.close(() => {
+      httpServer.close(() => {
+        process.exit(0)
+      })
     })
-  }, 10)
+  }, 10000)
+}
+
+const gameOver = (app: IApp, winner: number) => {
+  console.log(`Game is over! Player ${winner} wins!`)
+
+  const message: Message.IGameOver = { winner }
+  app.server.to('players').emit('gameover', message)
+
+  stop(app)
 }
 
 const getPlayerCount = (app: IApp) => {
