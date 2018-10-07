@@ -176,3 +176,35 @@ export const spawnPost = (state: IState, options: ISpawnPostOptions) =>  {
 
   return post
 }
+
+interface ISpawnCoverOptions {
+  position: Matter.Vector
+  angle: number
+}
+
+export const spawnCover = (state: IState, options: ISpawnPostOptions) =>  {
+  const { width, height, offset } = state.config.cover
+
+  const direction = Matter.Vector.mult(options.position, -1)
+  const norm = Matter.Vector.normalise(direction)
+  const delta = Matter.Vector.mult(norm, offset)
+
+  const position = Matter.Vector.add(options.position, delta)
+  const { angle } = options
+
+  const cover = Matter.Bodies.rectangle(0, 0, width, height, {
+    isStatic: true,
+    collisionFilter: {
+      group: 0,
+      category: 3,
+      mask: ~0,
+    },
+    position,
+    angle,
+  })
+
+  Matter.World.add(state.engine.world, cover)
+  state.covers[cover.id] = cover
+
+  return cover
+}

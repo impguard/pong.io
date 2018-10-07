@@ -28,6 +28,7 @@ export const create = (config: IConfig): IState => {
     paddles: {},
     flippers: {},
     posts: {},
+    covers: {},
     runner: {
       beforeTick: [],
     },

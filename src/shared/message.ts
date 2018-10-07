@@ -17,6 +17,10 @@ export interface IGoal {
   health: number
 }
 
+export interface IDeath {
+  id: number,
+}
+
 export interface IGameState {
   sample: Game.ISample
 }
