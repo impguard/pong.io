@@ -8,6 +8,7 @@ import * as _ from 'lodash'
 import * as Simulation from './simulation'
 import * as Message from '../shared/message'
 import { Status, IApp } from './interface'
+import event from '../shared/event'
 import config from './config'
 
 /****************************************
@@ -54,33 +55,37 @@ const create = () => {
     status: Status.READY,
     inputs: {},
     game: null,
-    emit: null,
     server: io(httpServer),
   }
+
+  event.on('gameOver', (winner: number) => {
+    gameOver(app, winner)
+  })
 
   Simulation.setup(app)
 
   app.server.on('connection', (socket) => {
-    add(app, socket)
+    const didAdd = add(app, socket)
 
-    // const readyToPlay = getPlayerCount(app) >= config.app.match.playersRequired
-    const readyToPlay = true
-    console.log(app.status)
+    if (!didAdd) {
+      console.log('Rejected player')
+      return
+    }
 
-    if (app.status === Status.READY && readyToPlay) {
+    const numPlayers = getPlayerCount(app)
+    const { playersRequired } = config.app.match
+
+    if (app.status === Status.READY && numPlayers >= playersRequired) {
       app.status = Status.STARTING
 
-      setTimeout(() => {
-        Simulation.reset(app)
-        app.status = Status.PLAYING
-      }, config.app.match.delay)
+      setTimeout(() => start(app), config.app.match.startDelay)
 
       const startingMessage: Message.IStarting = {
-        delay: config.app.match.delay,
+        delay: config.app.match.startDelay,
       }
 
       app.server.to('players').emit('starting', startingMessage)
-      console.log(`Starting game in ${config.app.match.delay}ms`)
+      console.log(`Starting game in ${config.app.match.startDelay}ms`)
     }
   })
 
@@ -88,6 +93,16 @@ const create = () => {
 }
 
 const add = (app: IApp, socket: SocketIO.Socket) => {
+  if (app.status !== Status.READY) {
+    const rejectMessage: Message.IReject = {
+      code: Message.ErrorCode.MATCHSTARTED,
+    }
+
+    socket.emit('rejected', rejectMessage)
+    socket.disconnect()
+    return false
+  }
+
   const id = Simulation.assign(app)
 
   if (!id) {
@@ -97,7 +112,7 @@ const add = (app: IApp, socket: SocketIO.Socket) => {
 
     socket.emit('rejected', rejectMessage)
     socket.disconnect()
-    return
+    return false
   }
 
   const acceptMessage: Message.IAccept = {
@@ -116,20 +131,58 @@ const add = (app: IApp, socket: SocketIO.Socket) => {
 
     if (remaining === 0) {
       console.log('No players remaining!')
+      stop(app)
     }
   })
 
   socket.on('input', (message: Message.IInput) => {
     app.inputs[id] = message.input
   })
+
+  return true
 }
 
 /****************************************
  * Application Helpers
  ****************************************/
 
+const start = (app: IApp) => {
+  Simulation.reset(app)
+  app.status = Status.PLAYING
+
+  const numPlayers = getPlayerCount(app)
+  console.log(`Game started with ${numPlayers} players`)
+}
+
+const stop = (app: IApp) => {
+  if (app.status === Status.STOPPING) {
+    return
+  }
+
+  console.log(`Game is shutting down in ${config.app.match.finishDelay}s`)
+
+  app.status = Status.STOPPING
+
+  setTimeout(() => {
+    app.server.close(() => {
+      httpServer.close(() => {
+        process.exit(0)
+      })
+    })
+  }, config.app.match.finishDelay)
+}
+
+const gameOver = (app: IApp, winner: number) => {
+  console.log(`Game is over! Player ${winner} wins!`)
+
+  const message: Message.IGameOver = { winner }
+  app.server.to('players').emit('gameover', message)
+
+  stop(app)
+}
+
 const getPlayerCount = (app: IApp) => {
-  return _.size(app.server.to('players').sockets.length)
+  return _.size(app.server.in('players').sockets)
 }
 
 /****************************************

@@ -36,7 +36,9 @@ const setup = (app: State.IApp, socket: SocketIOClient.Socket) => {
 
   socket.on('rejected', (message: Message.IReject) => {
     if (message.code === Message.ErrorCode.MATCHFULL) {
-      alert('match is full')
+      alert('match is full!')
+    } else if (message.code === Message.ErrorCode.MATCHSTARTED) {
+      alert('match has already started!')
     }
   })
 
@@ -52,6 +54,12 @@ const setup = (app: State.IApp, socket: SocketIOClient.Socket) => {
     } else {
       console.log('disconnected...attempting to reconnect')
     }
+  })
+
+  socket.on('gameover', (message: Message.IGameOver) => {
+    const { winner } = message
+    alert(`Winner is player ${winner}!`)
+    Scene.change(Scene.Name.Home)
   })
 
   socket.on('accepted', (message: Message.IAccept) => {

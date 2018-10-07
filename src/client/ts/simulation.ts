@@ -5,6 +5,7 @@ import * as State from './state'
 import * as Gamepad from './gamepad'
 import * as Game from '../../shared/game'
 import * as Message from '../../shared/message'
+import event from '../../shared/event'
 
 interface ISimulationOptions {
   element: HTMLElement
@@ -55,7 +56,7 @@ export const setup = (app: State.IApp, options: ISimulationOptions) => {
 
   app.render = render
 
-  Game.onBeforeTick(app.game, () => tick(app))
+  event.on('beforeTick', () => tick(app))
 }
 
 export const sync = (app: State.IApp, sample: Game.ISample) => {
@@ -95,6 +96,11 @@ const syncFlipper = (flipper: Game.IFlipper, sample: Game.ISampleFlipper) => {
 }
 
 export const tick = (app: State.IApp) => {
+  const { min, max } = app.game.config.ball.speed
+  _.forEach(app.game.balls, (ball: Matter.Body) => {
+    Game.clampBall(ball, min, max)
+  })
+
   const input = Gamepad.sample()
   const player = app.game.players[app.assignment]
 

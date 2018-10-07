@@ -31,7 +31,6 @@ export interface IState {
   config: IConfig,
   runner: {
     id?: any,
-    beforeTick: Array<() => void>,
   },
   players: {
     [id: number]: IPlayer,

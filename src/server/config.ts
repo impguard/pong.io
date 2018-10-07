@@ -7,7 +7,8 @@ interface IConfig {
     }
     match: {
       playersRequired: number
-      delay: number,
+      startDelay: number,
+      finishDelay: number,
     },
   }
   game: Game.IConfig
@@ -20,8 +21,8 @@ const config: IConfig = {
     },
     ball: {
       speed: {
-        min: 3,
-        max: 4,
+        min: 10,
+        max: 15,
       },
       damage: 1,
       radius: 5,
@@ -30,11 +31,6 @@ const config: IConfig = {
     post: {
       width: 80,
       height: 15,
-    },
-    cover: {
-      width: 150,
-      height: 15,
-      offset: 30,
     },
     player: {
       speed: 0.15,
@@ -60,7 +56,12 @@ const config: IConfig = {
         speed: 0.7,
       },
     },
-    numBalls: 1,
+    cover: {
+      width: 150,
+      height: 15,
+      offset: 30,
+    },
+    numBalls: 10,
     numPlayers: 10,
     delta: 16,
   },
@@ -69,8 +70,9 @@ const config: IConfig = {
       delta: 100,
     },
     match: {
-      playersRequired: 1,
-      delay: 5000,
+      playersRequired: 2,
+      startDelay: 5000,
+      finishDelay: 5000,
     },
   },
 }
