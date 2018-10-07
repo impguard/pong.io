@@ -112,6 +112,7 @@ const add = (app: IApp, socket: SocketIO.Socket) => {
 
     if (remaining === 0) {
       console.log('No players remaining!')
+      stop(app)
     }
   })
 
@@ -130,6 +131,16 @@ const start = (app: IApp) => {
 
   const numPlayers = getPlayerCount(app)
   console.log(`Game started with ${numPlayers} players`)
+}
+
+const stop = (app: IApp) => {
+  console.log('Game is shutting down in 10s')
+
+  setTimeout(() => {
+    httpServer.close(() => {
+      process.exit(0)
+    })
+  }, 10)
 }
 
 const getPlayerCount = (app: IApp) => {
