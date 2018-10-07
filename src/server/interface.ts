@@ -4,7 +4,6 @@ export enum Status { READY, STARTING, PLAYING, STOPPING }
 
 export interface IApp {
   status: Status,
-  emit: (event: string | symbol, ...args: any[]) => boolean,
   server: SocketIO.Server,
   game: Game.IState,
   inputs: {

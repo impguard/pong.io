@@ -55,7 +55,6 @@ const create = () => {
     status: Status.READY,
     inputs: {},
     game: null,
-    emit: null,
     server: io(httpServer),
   }
 

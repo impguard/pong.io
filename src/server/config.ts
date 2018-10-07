@@ -56,6 +56,11 @@ const config: IConfig = {
         speed: 0.7,
       },
     },
+    cover: {
+      width: 150,
+      height: 15,
+      offset: 30,
+    },
     numBalls: 10,
     numPlayers: 10,
     delta: 16,
