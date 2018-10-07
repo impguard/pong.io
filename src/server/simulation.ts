@@ -5,7 +5,7 @@ import * as Message from '../shared/message'
 import config from './config'
 import event from '../shared/event'
 import { IApp, Status } from './interface'
-import { IPlayer } from '../shared/game';
+import { IPlayer } from '../shared/game'
 
 export const setup = (app: IApp) => {
   app.game =  Game.create(config.game)
