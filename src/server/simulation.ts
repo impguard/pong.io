@@ -132,6 +132,8 @@ export const tick = (app: IApp) => {
     if (isAlive) { Game.handleInput(app.game, player, input) }
   })
 
+  Game.tick(app.game)
+
   app.inputs = {}
 }
 
@@ -193,18 +195,6 @@ const handleBall = (app: IApp, ball: Matter.Body) => {
   if (didScore) {
       Game.resetBall(app.game, ball)
   }
-
-  const { min, max } = app.game.config.ball.speed
-  clampVelocity(app, ball, min, max)
-}
-
-const clampVelocity = (app: IApp, body: Matter.Body, min: number, max: number) => {
-  const speed = Matter.Vector.magnitude(body.velocity)
-  const clampedSpeed = _.clamp(speed, min, max)
-  const direction = Matter.Vector.normalise(body.velocity)
-  const clampedVelocity = Matter.Vector.mult(direction, clampedSpeed)
-
-  Matter.Body.setVelocity(body, clampedVelocity)
 }
 
 const handleScore = (app: IApp, ball: Matter.Body) => {

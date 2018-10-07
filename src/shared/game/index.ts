@@ -55,6 +55,14 @@ export const destroy = (state: IState) => {
  * Game Logic Helpers
  ****************************************/
 
+export const tick = (state: IState) => {
+  const { min, max } = state.config.ball.speed
+
+  _.forEach(state.balls, (ball) => {
+    clampBall(ball, min, max)
+  })
+}
+
 export const assign = (state: IState) => {
   const player = _.find(state.players, (p) => !p.assigned)
 
@@ -74,6 +82,15 @@ export const resetBall = (state: IState, ball: Matter.Body) => {
 
   Matter.Body.setPosition(ball, Matter.Vector.create(0, 0))
   Matter.Body.setVelocity(ball, velocity)
+}
+
+const clampBall = (ball: Matter.Body, min: number, max: number) => {
+  const speed = Matter.Vector.magnitude(ball.velocity)
+  const clampedSpeed = _.clamp(speed, min, max)
+  const direction = Matter.Vector.normalise(ball.velocity)
+  const clampedVelocity = Matter.Vector.mult(direction, clampedSpeed)
+
+  Matter.Body.setVelocity(ball, clampedVelocity)
 }
 
 /****************************************
