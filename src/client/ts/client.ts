@@ -77,12 +77,20 @@ const setup = (app: State.IApp, socket: SocketIOClient.Socket) => {
     Simulation.sync(app, message.sample)
   })
 
+  // TODO: Move these events to gamestate... this is a bug
   socket.on('goal', (message: Message.IGoal) => {
     const playerId = message.id
     const health = message.health
 
-    Simulation.playerhealth(app, playerId, health)
+    Simulation.playerHealth(app, playerId, health)
     console.log('Goal on Player ', playerId)
+  })
+
+  socket.on('death', (message: Message.IDeath) => {
+    const playerId = message.id
+
+    Simulation.playerDeath(app, playerId)
+    console.log('Player', playerId, 'died' )
   })
 
 }

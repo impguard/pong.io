@@ -48,6 +48,9 @@ export interface IState {
   posts: {
     [id: number]: Matter.Body,
   }
+  covers: {
+    [id: number]: Matter.Body,
+  }
 }
 
 export interface ISampleInitial {
@@ -103,11 +106,6 @@ export interface ISample {
   },
 }
 
-export interface IGoal {
-  id: number,
-  health: number,
-}
-
 export interface IInput {
   horizontal: number,
   lswing: boolean,
@@ -123,6 +121,11 @@ export interface IConfig {
   post: {
     width: number,
     height: number,
+  },
+  cover: {
+    width: number,
+    height: number,
+    offset: number,
   },
   player: {
     speed: number,

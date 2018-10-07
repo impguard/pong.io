@@ -4,6 +4,7 @@ import * as Game from '../shared/game'
 import * as Message from '../shared/message'
 import config from './config'
 import { IApp, Status } from './interface'
+import { IPlayer } from '../shared/game';
 
 export const setup = (app: IApp) => {
   app.game =  Game.create(config.game)
@@ -51,6 +52,14 @@ export const setup = (app: IApp) => {
   })
 
   Game.onBeforeTick(app.game, () => tick(app))
+}
+
+const setupCover = (app: IApp, player: IPlayer) => {
+  console.log("Setting up goal cover")
+  const position = player.basePosition
+  const angle = player.baseAngle
+
+  Game.spawnCover(app.game, { position, angle })
 }
 
 export const sample = (app: IApp): Game.ISample => {
@@ -225,6 +234,13 @@ const score = (app: IApp, ball: Matter.Body, player: Game.IPlayer) => {
 
   if (isDead) {
     console.log(`Player ${player.composite.id} is dead!`)
+
+    setupCover(app, player)
+
+    app.server.to('players').emit('death', {
+      id: player.composite.id,
+    })
+
   }
 }
 

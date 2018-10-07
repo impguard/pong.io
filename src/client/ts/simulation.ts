@@ -41,6 +41,7 @@ export const setup = (app: State.IApp, options: ISimulationOptions) => {
       wireframes: true,
       // @ts-ignore
       showBounds: true,
+      showIds: true,
     },
     element: options.element,
     engine: app.game.engine,
@@ -116,6 +117,15 @@ export const destroy = (app: State.IApp) => {
   app.render = app.game = null
 }
 
-export const playerhealth = (app: State.IApp, playerId: number, health: number) => {
+export const playerHealth = (app: State.IApp, playerId: number, health: number) => {
   app.game.players[playerId].health = health
+}
+
+export const playerDeath = (app: State.IApp, playerId: number) => {
+  const player = app.game.players[playerId]
+
+  const position = player.basePosition
+  const angle = player.baseAngle
+
+  Game.spawnCover(app.game, { position, angle })
 }

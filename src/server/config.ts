@@ -20,8 +20,8 @@ const config: IConfig = {
     },
     ball: {
       speed: {
-        min: 1,
-        max: 3,
+        min: 3,
+        max: 4,
       },
       damage: 1,
       radius: 5,
@@ -31,9 +31,14 @@ const config: IConfig = {
       width: 80,
       height: 15,
     },
+    cover: {
+      width: 150,
+      height: 15,
+      offset: 30,
+    },
     player: {
       speed: 0.15,
-      health: 3,
+      health: 1,
     },
     paddle: {
       width: 15,
