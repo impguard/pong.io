@@ -54,6 +54,12 @@ const setup = (app: State.IApp, socket: SocketIOClient.Socket) => {
     }
   })
 
+  socket.on('gameover', (message: Message.IGameOver) => {
+    const { winner } = message
+    alert(`Winner is player ${winner}!`)
+    Scene.change(Scene.Name.Home)
+  })
+
   socket.on('accepted', (message: Message.IAccept) => {
     const { id, config, sample } = message
 

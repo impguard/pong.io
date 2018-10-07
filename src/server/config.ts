@@ -7,7 +7,8 @@ interface IConfig {
     }
     match: {
       playersRequired: number
-      delay: number,
+      startDelay: number,
+      finishDelay: number,
     },
   }
   game: Game.IConfig
@@ -65,7 +66,8 @@ const config: IConfig = {
     },
     match: {
       playersRequired: 2,
-      delay: 5000,
+      startDelay: 5000,
+      finishDelay: 5000,
     },
   },
 }

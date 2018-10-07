@@ -79,14 +79,14 @@ const create = () => {
     if (app.status === Status.READY && numPlayers >= playersRequired) {
       app.status = Status.STARTING
 
-      setTimeout(() => start(app), config.app.match.delay)
+      setTimeout(() => start(app), config.app.match.startDelay)
 
       const startingMessage: Message.IStarting = {
-        delay: config.app.match.delay,
+        delay: config.app.match.startDelay,
       }
 
       app.server.to('players').emit('starting', startingMessage)
-      console.log(`Starting game in ${config.app.match.delay}ms`)
+      console.log(`Starting game in ${config.app.match.startDelay}ms`)
     }
   })
 
@@ -156,7 +156,11 @@ const start = (app: IApp) => {
 }
 
 const stop = (app: IApp) => {
-  console.log('Game is shutting down in 10s')
+  if (app.status === Status.STOPPING) {
+    return
+  }
+
+  console.log(`Game is shutting down in ${config.app.match.finishDelay}s`)
 
   app.status = Status.STOPPING
 
@@ -166,7 +170,7 @@ const stop = (app: IApp) => {
         process.exit(0)
       })
     })
-  }, 10000)
+  }, config.app.match.finishDelay)
 }
 
 const gameOver = (app: IApp, winner: number) => {
