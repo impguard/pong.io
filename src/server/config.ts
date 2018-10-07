@@ -64,7 +64,7 @@ const config: IConfig = {
       delta: 100,
     },
     match: {
-      playersRequired: 1,
+      playersRequired: 2,
       delay: 5000,
     },
   },

@@ -63,17 +63,13 @@ const create = () => {
   app.server.on('connection', (socket) => {
     add(app, socket)
 
-    // const readyToPlay = getPlayerCount(app) >= config.app.match.playersRequired
-    const readyToPlay = true
-    console.log(app.status)
+    const numPlayers = getPlayerCount(app)
+    const { playersRequired } = config.app.match
 
-    if (app.status === Status.READY && readyToPlay) {
+    if (app.status === Status.READY && numPlayers >= playersRequired) {
       app.status = Status.STARTING
 
-      setTimeout(() => {
-        Simulation.reset(app)
-        app.status = Status.PLAYING
-      }, config.app.match.delay)
+      setTimeout(() => start(app), config.app.match.delay)
 
       const startingMessage: Message.IStarting = {
         delay: config.app.match.delay,
@@ -128,8 +124,16 @@ const add = (app: IApp, socket: SocketIO.Socket) => {
  * Application Helpers
  ****************************************/
 
+const start = (app: IApp) => {
+  Simulation.reset(app)
+  app.status = Status.PLAYING
+
+  const numPlayers = getPlayerCount(app)
+  console.log(`Game started with ${numPlayers} players`)
+}
+
 const getPlayerCount = (app: IApp) => {
-  return _.size(app.server.to('players').sockets.length)
+  return _.size(app.server.in('players').sockets)
 }
 
 /****************************************
