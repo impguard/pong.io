@@ -21,8 +21,8 @@ const config: IConfig = {
     },
     ball: {
       speed: {
-        min: 10,
-        max: 15,
+        min: 5,
+        max: 10,
       },
       damage: 1,
       radius: 5,

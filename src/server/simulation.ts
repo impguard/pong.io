@@ -1,7 +1,8 @@
 import * as Matter from 'matter-js'
 import * as _ from 'lodash'
 import * as Game from '../shared/game'
-import * as Message from '../shared/message'
+import * as Util from './util'
+import * as Bot from './bot'
 import config from './config'
 import event from '../shared/event'
 import { IApp, Status } from './interface'
@@ -126,8 +127,20 @@ export const tick = (app: IApp) => {
     Game.clampBall(ball, min, max)
   })
 
-  _.forEach(app.inputs, (input, id) => {
-    const player: Game.IPlayer = app.game.players[id]
+  _.forEach(app.game.players, (player: IPlayer) => {
+    const { id } = player.composite
+    const shouldBotPlay = !player.assigned && app.status === Status.PLAYING
+
+    const input = app.inputs[id]
+      ? app.inputs[id]
+      : shouldBotPlay
+      ? Bot.think(app.game, player)
+      : null
+
+    if (!input) {
+      return
+    }
+
     const isAlive = player.health > 0
 
     if (isAlive) {
@@ -225,7 +238,7 @@ const handleScore = (app: IApp, ball: Matter.Body) => {
   _.forEach(app.game.players, (player) => {
     if (player.health <= 0) { return }
 
-    const didScore = lineSegmentsIntersect(
+    const didScore = !!Util.intersectsAt(
         Matter.Vector.create(0, 0), ball.position,
         player.goal[0], player.goal[1],
     )
@@ -245,18 +258,4 @@ const score = (app: IApp, ball: Matter.Body, player: Game.IPlayer) => {
     console.log(`Player ${player.composite.id} is dead!`)
     Game.spawnCoverForPlayer(app.game, player)
   }
-}
-
-const lineSegmentsIntersect = (
-  p1: Matter.Vector,
-  p2: Matter.Vector,
-  q1: Matter.Vector,
-  q2: Matter.Vector,
-) => {
-  const d = (p2.x - p1.x) * (q2.y - q1.y) - (p2.y - p1.y) * (q2.x - q1.x)
-  const u = ((q1.x - p1.x) * (q2.y - q1.y) - (q1.y - p1.y) * (q2.x - q1.x)) / d
-  const v = ((q1.x - p1.x) * (p2.y - p1.y) - (q1.y - p1.y) * (p2.x - p1.x)) / d
-
-  const didIntersect = !(d === 0.0 || u < 0.0 || u > 1.0 || v < 0.0 || v > 1.0)
-  return didIntersect
 }
