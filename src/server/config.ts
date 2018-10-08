@@ -61,7 +61,7 @@ const config: IConfig = {
       height: 15,
       offset: 30,
     },
-    numBalls: 5,
+    numBalls: 1,
     numPlayers: 10,
     delta: 16,
   },
