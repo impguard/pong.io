@@ -58,11 +58,11 @@ const create = () => {
     server: io(httpServer),
   }
 
+  Simulation.setup(app)
+
   event.on('gameOver', (winner: number) => {
     gameOver(app, winner)
   })
-
-  Simulation.setup(app)
 
   app.server.on('connection', (socket) => {
     const didAdd = add(app, socket)

@@ -66,6 +66,12 @@
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/@types/koa-compose/-/koa-compose-3.2.2.tgz#dc106e000bbf92a3ac900f756df47344887ee847"
 
+"@types/koa-logger@^3.1.0":
+  version "3.1.0"
+  resolved "https://artifacts.riotgames.com:443/artifactory/api/npm/npm/@types/koa-logger/-/koa-logger-3.1.0.tgz#133acdbc56d87b5a559cab25528b087381a8fc0d"
+  dependencies:
+    "@types/koa" "*"
+
 "@types/koa-router@^7.0.31":
   version "7.0.31"
   resolved "https://registry.yarnpkg.com/@types/koa-router/-/koa-router-7.0.31.tgz#afe279634cca7b4536be38cf641f35f58a4bc5ee"
