@@ -1,12 +1,9 @@
 import * as $ from 'jquery'
 import * as State from './state'
 
-export interface IRenderOptions {
-  angle: number,
-}
-
-export const setup = (app: State.IApp, options: IRenderOptions) => {
-  const { angle } = options
+export const setup = (app: State.IApp) => {
+  const player = app.game.players[app.assignment]
+  const angle = player.baseAngle
 
   $(app.render.canvas).css('transform', `scaleY(-1) rotate(-${angle}rad)`)
 

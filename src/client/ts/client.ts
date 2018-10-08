@@ -74,10 +74,7 @@ const setup = (app: State.IApp, socket: SocketIOClient.Socket) => {
     Simulation.setup(app, {element, config, sample})
     Simulation.run(app)
 
-    const player = app.game.players[app.assignment]
-    const angle = player.baseAngle
-
-    Render.setup(app, { angle })
+    Render.setup(app)
     Render.run(app)
 
     Scene.change(Scene.Name.Game)
