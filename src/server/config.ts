@@ -21,8 +21,8 @@ const config: IConfig = {
     },
     ball: {
       speed: {
-        min: 3,
-        max: 8,
+        min: 5,
+        max: 10,
       },
       damage: 1,
       radius: 5,
@@ -70,7 +70,7 @@ const config: IConfig = {
       delta: 100,
     },
     match: {
-      playersRequired: 2,
+      playersRequired: 1,
       startDelay: 5000,
       finishDelay: 5000,
     },
