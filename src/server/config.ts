@@ -61,7 +61,7 @@ const config: IConfig = {
       height: 15,
       offset: 30,
     },
-    numBalls: 10,
+    numBalls: 1,
     numPlayers: 10,
     delta: 16,
   },
@@ -70,7 +70,7 @@ const config: IConfig = {
       delta: 100,
     },
     match: {
-      playersRequired: 2,
+      playersRequired: 1,
       startDelay: 5000,
       finishDelay: 5000,
     },

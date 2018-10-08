@@ -1,6 +1,6 @@
 import * as Matter from 'matter-js'
 import * as _ from 'lodash'
-import { IState, IFlipperType, IFlipperState } from './interface'
+import { IState, IPlayer, IFlipperType, IFlipperState } from './interface'
 
 interface ISpawnBallOptions {
   id?: number,
@@ -178,19 +178,27 @@ export const spawnPost = (state: IState, options: ISpawnPostOptions) =>  {
 }
 
 interface ISpawnCoverOptions {
-  position: Matter.Vector
-  angle: number
+  id?: number,
+  position: Matter.Vector,
+  angle: number,
 }
 
-export const spawnCover = (state: IState, options: ISpawnPostOptions) =>  {
-  const { width, height, offset } = state.config.cover
+export const spawnCoverForPlayer = (state: IState, player: IPlayer) => {
+  const { offset } = state.config.cover
+  const { basePosition, baseAngle } = player
 
-  const direction = Matter.Vector.mult(options.position, -1)
+  const direction = Matter.Vector.mult(basePosition, -1)
   const norm = Matter.Vector.normalise(direction)
   const delta = Matter.Vector.mult(norm, offset)
 
-  const position = Matter.Vector.add(options.position, delta)
-  const { angle } = options
+  const position = Matter.Vector.add(basePosition, delta)
+  const angle = baseAngle
+
+  spawnCover(state, { position, angle })
+}
+
+export const spawnCover = (state: IState, options: ISpawnCoverOptions) => {
+  const { width, height } = state.config.cover
 
   const cover = Matter.Bodies.rectangle(0, 0, width, height, {
     isStatic: true,
@@ -199,8 +207,7 @@ export const spawnCover = (state: IState, options: ISpawnPostOptions) =>  {
       category: 3,
       mask: ~0,
     },
-    position,
-    angle,
+    ...options,
   })
 
   Matter.World.add(state.engine.world, cover)

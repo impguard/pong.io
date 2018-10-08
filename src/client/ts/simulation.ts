@@ -64,7 +64,7 @@ export const sync = (app: State.IApp, sample: Game.ISample) => {
     const position = Matter.Vector.create(value.x, value.y)
     const velocity = Matter.Vector.create(value.vx, value.vy)
 
-    const ball = id in app.game.balls
+    const ball = app.game.balls[id]
       ? app.game.balls[id]
       : Game.spawnBall(app.game, {id: _.toInteger(id)})
 
@@ -75,11 +75,22 @@ export const sync = (app: State.IApp, sample: Game.ISample) => {
   _.forEach(sample.players, (value, id) => {
     const player: Game.IPlayer = app.game.players[id]
 
+    player.health = value.h
+
     Matter.Body.setPosition(player.paddle, Matter.Vector.create(value.p.x, value.p.y))
     Matter.Body.setVelocity(player.paddle, Matter.Vector.create(value.p.vx, value.p.vy))
 
     syncFlipper(player.lflipper, value.lf)
     syncFlipper(player.rflipper, value.rf)
+  })
+
+  _.forEach(sample.covers, (value, id) => {
+    if (app.game.covers[id]) { return }
+
+    Game.spawnCover(app.game, {
+      position: Matter.Vector.create(value.x, value.y),
+      angle: value.a,
+    })
   })
 }
 
@@ -121,17 +132,4 @@ export const destroy = (app: State.IApp) => {
   Matter.Render.stop(app.render)
   $(app.render.canvas).remove()
   app.render = app.game = null
-}
-
-export const playerHealth = (app: State.IApp, playerId: number, health: number) => {
-  app.game.players[playerId].health = health
-}
-
-export const playerDeath = (app: State.IApp, playerId: number) => {
-  const player = app.game.players[playerId]
-
-  const position = player.basePosition
-  const angle = player.baseAngle
-
-  Game.spawnCover(app.game, { position, angle })
 }

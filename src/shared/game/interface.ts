@@ -101,6 +101,14 @@ export interface ISample {
       },
       lf: ISampleFlipper,
       rf: ISampleFlipper,
+      h: number,
+    },
+  },
+  covers: {
+    [id: number]: {
+      x: number,
+      y: number,
+      a: number,
     },
   },
 }
