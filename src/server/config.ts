@@ -34,7 +34,7 @@ const config: IConfig = {
     },
     player: {
       speed: 0.15,
-      health: 1,
+      health: 10,
     },
     paddle: {
       width: 15,

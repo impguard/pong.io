@@ -1,16 +1,14 @@
-import * as $ from 'jquery'
 import * as _ from 'lodash'
 import * as Matter from 'matter-js'
 import * as State from './state'
 import * as Gamepad from './gamepad'
 import * as Game from '../../shared/game'
 import * as Message from '../../shared/message'
-import event from '../../shared/event'
 
 interface ISimulationOptions {
-  element: HTMLElement
-  config: Game.IConfig
-  sample: Game.ISampleInitial
+  element: HTMLElement,
+  config: Game.IConfig,
+  sample: Game.ISampleInitial,
 }
 
 export const setup = (app: State.IApp, options: ISimulationOptions) => {
@@ -55,8 +53,6 @@ export const setup = (app: State.IApp, options: ISimulationOptions) => {
   })
 
   app.render = render
-
-  event.on('beforeTick', () => tick(app))
 }
 
 export const sync = (app: State.IApp, sample: Game.ISample) => {
@@ -122,7 +118,7 @@ export const tick = (app: State.IApp) => {
 }
 
 export const run = (app: State.IApp) => {
-  Game.run(app.game)
+  Game.run(app.game, () => tick(app))
   Matter.Render.run(app.render)
 }
 
@@ -130,6 +126,5 @@ export const destroy = (app: State.IApp) => {
   Game.stop(app.game)
   Game.destroy(app.game)
   Matter.Render.stop(app.render)
-  $(app.render.canvas).remove()
-  app.render = app.game = null
+  app.game = null
 }

@@ -52,8 +52,6 @@ export const setup = (app: IApp) => {
       goal: [leftPost.position, rightPost.position],
     })
   })
-
-  event.on('beforeTick', () => tick(app))
 }
 
 export const sample = (app: IApp): Game.ISample => {
@@ -190,7 +188,7 @@ const resetFlipper = (flipper: Game.IFlipper) => {
 }
 
 export const run = (app: IApp) => {
-  Game.run(app.game)
+  Game.run(app.game, () => tick(app))
 }
 
 /****************************************
