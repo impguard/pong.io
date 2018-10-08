@@ -55,13 +55,6 @@ export const setup = (app: IApp) => {
   event.on('beforeTick', () => tick(app))
 }
 
-const setupCover = (app: IApp, player: IPlayer) => {
-  const position = player.basePosition
-  const angle = player.baseAngle
-
-  Game.spawnCover(app.game, { position, angle })
-}
-
 export const sample = (app: IApp): Game.ISample => {
   // May be worth optimizing this area of code
   const balls = _.mapValues(app.game.balls, (ball) => ({
@@ -71,20 +64,25 @@ export const sample = (app: IApp): Game.ISample => {
     vy: ball.velocity.y,
   }))
 
-  const players = _.mapValues(app.game.players, (player) => {
-    return {
-      p: {
-        x: player.paddle.position.x,
-        y: player.paddle.position.y,
-        vx: player.paddle.velocity.x,
-        vy: player.paddle.velocity.y,
-      },
-      lf: sampleFlipper(player.lflipper),
-      rf: sampleFlipper(player.rflipper),
-    }
-  })
+  const players = _.mapValues(app.game.players, (player) => ({
+    p: {
+      x: player.paddle.position.x,
+      y: player.paddle.position.y,
+      vx: player.paddle.velocity.x,
+      vy: player.paddle.velocity.y,
+    },
+    lf: sampleFlipper(player.lflipper),
+    rf: sampleFlipper(player.rflipper),
+    h: player.health,
+  }))
 
-  return {balls, players}
+  const covers = _.mapValues(app.game.covers, (cover) => ({
+    x: cover.position.x,
+    y: cover.position.y,
+    a: cover.angle,
+  }))
+
+  return {balls, players, covers}
 }
 
 const sampleFlipper = (flipper: Game.IFlipper): Game.ISampleFlipper => {
@@ -241,22 +239,11 @@ const handleScore = (app: IApp, ball: Matter.Body) => {
 const score = (app: IApp, ball: Matter.Body, player: Game.IPlayer) => {
   player.health -= app.game.config.ball.damage
 
-  app.server.to('players').emit('goal', {
-    id: player.composite.id,
-    health: player.health,
-  })
-
   const isDead = player.health <= 0
 
   if (isDead) {
     console.log(`Player ${player.composite.id} is dead!`)
-
-    setupCover(app, player)
-
-    app.server.to('players').emit('death', {
-      id: player.composite.id,
-    })
-
+    Game.spawnCoverForPlayer(app.game, player)
   }
 }
 
