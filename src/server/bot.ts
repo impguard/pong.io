@@ -9,20 +9,20 @@ export const think = (state: IState, player: IPlayer): IInput => {
 
   _.forEach(state.balls, (ball) => {
     const { speed, position } = ball
-    const scoreIntersection = scoresAt(ball, player)
+    const goalIntersection = scoresAt(ball, player)
 
-    if (!scoreIntersection) {
+    if (!goalIntersection) {
       return input(0, false, false)
     }
 
     const distance = Matter.Vector.magnitude(
-      Matter.Vector.sub(position, scoreIntersection))
+      Matter.Vector.sub(position, goalIntersection))
 
     const time = distance / speed
 
     if (time < shortestTime) {
       shortestTime = time
-      intersection = scoreIntersection
+      intersection = goalIntersection
     }
   })
 
