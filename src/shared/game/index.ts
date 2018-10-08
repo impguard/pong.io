@@ -34,9 +34,9 @@ export const create = (config: IConfig): IState => {
   }
 }
 
-export const run = (state: IState) =>  {
+export const run = (state: IState, tick: () => void) =>  {
   state.runner.id = setInterval(() => {
-    event.emit('beforeTick')
+    tick()
 
     Matter.Engine.update(state.engine, state.config.delta)
   }, state.config.delta)

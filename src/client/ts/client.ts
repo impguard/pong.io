@@ -1,6 +1,7 @@
 import * as $ from 'jquery'
 import * as io from 'socket.io-client'
 import * as Simulation from './simulation'
+import * as Render from './render'
 import * as Scene from './scene'
 import * as State from './state'
 import * as Game from '../../shared/game'
@@ -71,12 +72,13 @@ const setup = (app: State.IApp, socket: SocketIOClient.Socket) => {
     const element = $('#game').get(0)
 
     Simulation.setup(app, {element, config, sample})
+    Simulation.run(app)
 
     const player = app.game.players[app.assignment]
     const angle = player.baseAngle
-    $(app.render.canvas).css('transform', `scaleY(-1) rotate(-${angle}rad)`)
 
-    Simulation.run(app)
+    Render.setup(app, { angle })
+    Render.run(app)
 
     Scene.change(Scene.Name.Game)
   })
@@ -105,7 +107,11 @@ const setup = (app: State.IApp, socket: SocketIOClient.Socket) => {
 
 const reset = (app: State.IApp) => {
   if (app.socket) { app.socket.disconnect() }
-  if (app.game) { Simulation.destroy(app) }
+
+  if (app.game) {
+    Simulation.destroy(app)
+    Render.destroy(app)
+  }
 
   app.accepted = false
   Scene.change(Scene.Name.Home)

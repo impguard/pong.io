@@ -51,8 +51,6 @@ export const setup = (app: IApp) => {
       goal: [leftPost.position, rightPost.position],
     })
   })
-
-  event.on('beforeTick', () => tick(app))
 }
 
 const setupCover = (app: IApp, player: IPlayer) => {
@@ -179,7 +177,7 @@ const resetFlipper = (flipper: Game.IFlipper) => {
 }
 
 export const run = (app: IApp) => {
-  Game.run(app.game)
+  Game.run(app.game, () => tick(app))
 }
 
 /****************************************
