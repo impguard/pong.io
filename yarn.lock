@@ -68,7 +68,7 @@
 
 "@types/koa-logger@^3.1.0":
   version "3.1.0"
-  resolved "https://artifacts.riotgames.com:443/artifactory/api/npm/npm/@types/koa-logger/-/koa-logger-3.1.0.tgz#133acdbc56d87b5a559cab25528b087381a8fc0d"
+  resolved "https://registry.yarnpkg.com/@types/koa-logger/-/koa-logger-3.1.0.tgz#133acdbc56d87b5a559cab25528b087381a8fc0d"
   dependencies:
     "@types/koa" "*"
 
