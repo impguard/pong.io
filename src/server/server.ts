@@ -172,6 +172,10 @@ const stop = (app: IApp) => {
         process.exit(0)
       })
     })
+
+    setTimeout(() => {
+      process.exit(0)
+    }, 5000)
   }, config.app.match.finishDelay)
 }
 
