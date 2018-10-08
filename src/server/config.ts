@@ -46,14 +46,14 @@ const config: IConfig = {
       spacing: 4,
       charge: {
         speed: 0.3,
-        angle: -45,
+        angle: -50,
       },
       swing: {
-        speed: 0.6,
-        angle: 45,
+        speed: 0.7,
+        angle: 65,
       },
       reset: {
-        speed: 0.7,
+        speed: 0.3,
       },
     },
     cover: {
@@ -61,7 +61,7 @@ const config: IConfig = {
       height: 15,
       offset: 30,
     },
-    numBalls: 1,
+    numBalls: 7,
     numPlayers: 10,
     delta: 16,
   },
