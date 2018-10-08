@@ -93,7 +93,10 @@ const create = () => {
 }
 
 const add = (app: IApp, socket: SocketIO.Socket) => {
-  if (app.status !== Status.READY) {
+  const isAccepting = app.status === Status.READY
+    || app.status === Status.STARTING
+
+  if (!isAccepting) {
     const rejectMessage: Message.IReject = {
       code: Message.ErrorCode.MATCHSTARTED,
     }
