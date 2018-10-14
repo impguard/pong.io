@@ -102,7 +102,8 @@ const getConfig = async (): Promise<IConfig> => {
     const config = useDefault ? DEFAULT : await getDynamoConfig()
     return config
   } catch (error) {
-    console.trace('Could not get configurations. Resorting to default.')
+    console.warn('Could not get configuration. Resorting to default.')
+    console.error(error, error.stack)
     return DEFAULT
   }
 }
