@@ -5,6 +5,8 @@ services:
     image: "pong:latest"
     ports:
       - "7777:80"
+    environment:
+      - "AWS_DEFAULT_REGION=us-west-2"
   client:
     container_name: "pong-client"
     command: yarn run:client

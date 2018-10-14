@@ -1,20 +1,13 @@
+import * as AWS from 'aws-sdk'
 import * as Game from '../shared/game'
+import { IApp, IAppConfig } from './interface'
 
-interface IConfig {
-  app: {
-    network: {
-      delta: number,
-    }
-    match: {
-      playersRequired: number
-      startDelay: number,
-      finishDelay: number,
-    },
-  }
-  game: Game.IConfig
+export interface IConfig {
+  game: Game.IConfig,
+  app: IAppConfig,
 }
 
-const config: IConfig = {
+const DEFAULT: IConfig = {
   game: {
     arena: {
       radius: 300,
@@ -77,4 +70,23 @@ const config: IConfig = {
   },
 }
 
-export default config
+const getDynamoConfig = async (): Promise<IConfig> => {
+  const client = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' })
+  const params = {
+    TableName: 'PongConfiguration',
+    Key: { Id: process.env.PONG_CONFIG_ID },
+  }
+
+  const response = await client.get(params).promise()
+  return response.Item.Config
+}
+
+const getConfig = async (): Promise<IConfig> => {
+  const config = process.env.PONG_USE_DEFAULT_CONFIG
+    ? DEFAULT
+    : await getDynamoConfig()
+
+  return config
+}
+
+export default getConfig

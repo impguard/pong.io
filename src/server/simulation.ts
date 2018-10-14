@@ -3,13 +3,12 @@ import * as _ from 'lodash'
 import * as Game from '../shared/game'
 import * as Util from './util'
 import * as Bot from './bot'
-import config from './config'
 import event from '../shared/event'
 import { IApp, Status } from './interface'
-import { IPlayer } from '../shared/game'
+import { IPlayer, IConfig } from '../shared/game'
 
-export const setup = (app: IApp) => {
-  app.game =  Game.create(config.game)
+export const setup = (app: IApp, config: IConfig) => {
+  app.game =  Game.create(config)
 
   // Spawn the balls into the game
   _.times(app.game.config.numBalls, () => {
@@ -17,8 +16,8 @@ export const setup = (app: IApp) => {
     Game.resetBall(app.game, ball)
   })
 
-  const numPlayers = config.game.numPlayers
-  const radius = config.game.arena.radius
+  const numPlayers = config.numPlayers
+  const radius = config.arena.radius
 
   // Spawn each goal post
   const theta = 2 * Math.PI / numPlayers

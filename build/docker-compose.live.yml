@@ -8,6 +8,9 @@ services:
       - "${PWD}:/game"
     ports:
       - "7777:80"
+    environment:
+      - "AWS_DEFAULT_REGION=us-west-2"
+      - "PONG_USE_DEFAULT_CONFIG"
   client:
     container_name: "pong-client"
     image: "pong:latest"
