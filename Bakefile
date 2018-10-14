@@ -272,7 +272,11 @@ function deploy {
   bake_echo_yellow "Deploying $tag build to server $env"
 
   local taskdef task
-  taskdef=$(jq ". | .containerDefinitions[0].image = \"$image_id\" | ." deploy/task-definition.json)
+  taskdef=$(jq ". \
+    | .containerDefinitions[0].image = \"$image_id\" \
+    | (.containerDefinitions[0].environment[] | select(.name == \"PONG_CONFIG_ID\") | .value) |= \"$env.pong\" \
+    | ." deploy/task-definition.json)
+
   task=$(aws ecs register-task-definition --family "pong-$env-server" --cli-input-json "$taskdef")
 
   echo "$task" | jq -r '.taskDefinition.taskDefinitionArn'
