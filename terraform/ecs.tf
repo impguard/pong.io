@@ -217,3 +217,29 @@ resource "aws_iam_role" "task" {
 }
 EOF
 }
+
+resource "aws_iam_role_policy_attachment" "task_dynamo_read" {
+  role       = "${aws_iam_role.task.name}"
+  policy_arn = "${aws_iam_policy.dynamo.arn}"
+}
+
+resource "aws_iam_policy" "dynamo" {
+  name        = "pong-dynamo_read_policy"
+  description = "Simple policy to allow services to read from dynamo"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Stmt1539550932888",
+      "Action": [
+        "dynamodb:GetItem"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:dynamodb:us-west-2:344778228378:table/PongConfiguration"
+    }
+  ]
+}
+EOF
+}
