@@ -24,3 +24,17 @@ export const intersectsAt = (
 
   return Matter.Vector.create(x, y)
 }
+
+export const yesno = (rawVal): boolean => {
+  const val = String(rawVal).trim()
+
+  if (/^(?:y|yes|true|1)$/i.test(val)) {
+    return true
+  }
+
+  if (/^(?:n|no|false|0)$/i.test(val)) {
+      return false
+    }
+
+  return false
+}

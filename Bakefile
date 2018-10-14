@@ -163,6 +163,10 @@ function run.live {
     bake_echo_green "Cache completed. Run 'bake yarn' to update."
   fi
 
+  export PONG_USE_DEFAULT_CONFIG=${PONG_USE_DEFAULT_CONFIG:-yes}
+
+  docker network create pong 1>/dev/null 2>&1 || true 
+
   compose up
 }
 

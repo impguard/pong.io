@@ -1,5 +1,6 @@
 import * as AWS from 'aws-sdk'
 import * as Game from '../shared/game'
+import * as Util from './util'
 import { IApp, IAppConfig } from './interface'
 
 export interface IConfig {
@@ -70,23 +71,40 @@ const DEFAULT: IConfig = {
   },
 }
 
+const {
+  PONG_USE_DEFAULT_CONFIG = false,
+  AWS_DEFAULT_REGION,
+} = process.env
+
 const getDynamoConfig = async (): Promise<IConfig> => {
-  const client = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' })
+  const client = new AWS.DynamoDB.DocumentClient()
   const params = {
     TableName: 'PongConfiguration',
     Key: { Id: process.env.PONG_CONFIG_ID },
   }
 
   const response = await client.get(params).promise()
-  return response.Item.Config
+  const config = JSON.parse(response.Item.Config)
+
+  console.log('Configurations loaded')
+
+  return config
 }
 
 const getConfig = async (): Promise<IConfig> => {
-  const config = process.env.PONG_USE_DEFAULT_CONFIG
-    ? DEFAULT
-    : await getDynamoConfig()
+  const useDefault = Util.yesno(PONG_USE_DEFAULT_CONFIG)
 
-  return config
+  if (useDefault) {
+    console.log('Using default configuration')
+  }
+
+  try {
+    const config = useDefault ? DEFAULT : await getDynamoConfig()
+    return config
+  } catch (error) {
+    console.error('Could not get configurations. Resorting to default.')
+    return DEFAULT
+  }
 }
 
 export default getConfig

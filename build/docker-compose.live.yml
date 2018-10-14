@@ -9,8 +9,11 @@ services:
     ports:
       - "7777:80"
     environment:
-      - "AWS_DEFAULT_REGION=us-west-2"
-      - "PONG_USE_DEFAULT_CONFIG"
+      - "AWS_REGION=us-west-2"
+      - "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}"
+      - "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}"
+      - "PONG_USE_DEFAULT_CONFIG=${PONG_USE_DEFAULT_CONFIG}"
+      - "PONG_CONFIG_ID=${PONG_CONFIG_ID}"
   client:
     container_name: "pong-client"
     image: "pong:latest"
@@ -19,3 +22,8 @@ services:
       - "${PWD}:/game"
     ports:
       - "7778:8080"
+
+networks:
+  default:
+    external:
+      name: pong
