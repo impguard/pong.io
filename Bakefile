@@ -163,10 +163,13 @@ function run.live {
     bake_echo_green "Cache completed. Run 'bake yarn' to update."
   fi
 
+  docker network create pong 1>/dev/null 2>&1 || true 
+
   compose up
 }
 
 bake_task lint "Runs the linter"
+# shellcheck disable=SC2120
 function lint {
   bake_echo_yellow "Linting client..."
   yarn lint:client "$@"
@@ -212,6 +215,7 @@ function push {
     return 1
   fi
 
+  # shellcheck disable=SC2119
   lint
 
   local tier version tag

@@ -9,7 +9,7 @@ import * as Simulation from './simulation'
 import * as Message from '../shared/message'
 import { Status, IApp } from './interface'
 import event from '../shared/event'
-import config from './config'
+import getConfig from './config'
 
 /****************************************
  * Koa Application
@@ -50,20 +50,27 @@ const httpServer = http.createServer(koa.callback())
  * Game Application
  ****************************************/
 
-const create = () => {
+const create = async () => {
+  // Create app state
   const app: IApp = {
     status: Status.READY,
+    config: null,
     inputs: {},
     game: null,
     server: io(httpServer),
   }
 
-  Simulation.setup(app)
+  const config = await getConfig()
+  app.config = config.app
 
+  Simulation.setup(app, config.game)
+
+  // Setup app event handlers
   event.on('gameOver', (winner: number) => {
     gameOver(app, winner)
   })
 
+  // Setup app server connection handler
   app.server.on('connection', (socket) => {
     const didAdd = add(app, socket)
 
@@ -73,19 +80,19 @@ const create = () => {
     }
 
     const numPlayers = getPlayerCount(app)
-    const { playersRequired } = config.app.match
+    const { playersRequired } = app.config.match
 
     if (app.status === Status.READY && numPlayers >= playersRequired) {
       app.status = Status.STARTING
 
-      setTimeout(() => start(app), config.app.match.startDelay)
+      setTimeout(() => start(app), app.config.match.startDelay)
 
       const startingMessage: Message.IStarting = {
-        delay: config.app.match.startDelay,
+        delay: app.config.match.startDelay,
       }
 
       app.server.to('players').emit('starting', startingMessage)
-      console.log(`Starting game in ${config.app.match.startDelay}ms`)
+      console.log(`Starting game in ${app.config.match.startDelay}ms`)
     }
   })
 
@@ -162,7 +169,7 @@ const stop = (app: IApp) => {
     return
   }
 
-  console.log(`Game is shutting down in ${config.app.match.finishDelay}s`)
+  console.log(`Game is shutting down in ${app.config.match.finishDelay}s`)
 
   app.status = Status.STOPPING
 
@@ -176,7 +183,7 @@ const stop = (app: IApp) => {
     setTimeout(() => {
       process.exit(0)
     }, 5000)
-  }, config.app.match.finishDelay)
+  }, app.config.match.finishDelay)
 }
 
 const gameOver = (app: IApp, winner: number) => {
@@ -196,8 +203,8 @@ const getPlayerCount = (app: IApp) => {
  * Entrypoint
  ****************************************/
 
-httpServer.listen(80, () => {
-  const app = create()
+httpServer.listen(80, async () => {
+  const app = await create()
 
   Simulation.run(app)
 
@@ -207,5 +214,5 @@ httpServer.listen(80, () => {
     }
 
     app.server.to('players').emit('gamestate', message)
-  }, config.app.network.delta)
+  }, app.config.network.delta)
 })

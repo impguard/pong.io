@@ -1,20 +1,14 @@
+import * as AWS from 'aws-sdk'
 import * as Game from '../shared/game'
+import * as Util from './util'
+import { IApp, IAppConfig } from './interface'
 
-interface IConfig {
-  app: {
-    network: {
-      delta: number,
-    }
-    match: {
-      playersRequired: number
-      startDelay: number,
-      finishDelay: number,
-    },
-  }
-  game: Game.IConfig
+export interface IConfig {
+  game: Game.IConfig,
+  app: IAppConfig,
 }
 
-const config: IConfig = {
+const DEFAULT: IConfig = {
   game: {
     arena: {
       radius: 300,
@@ -77,4 +71,40 @@ const config: IConfig = {
   },
 }
 
-export default config
+const {
+  PONG_USE_DEFAULT_CONFIG = false,
+  AWS_DEFAULT_REGION,
+} = process.env
+
+const getDynamoConfig = async (): Promise<IConfig> => {
+  const client = new AWS.DynamoDB.DocumentClient()
+  const params = {
+    TableName: 'PongConfiguration',
+    Key: { Id: process.env.PONG_CONFIG_ID },
+  }
+
+  const response = await client.get(params).promise()
+  const config = JSON.parse(response.Item.Config)
+
+  console.log('Configurations loaded')
+
+  return config
+}
+
+const getConfig = async (): Promise<IConfig> => {
+  const useDefault = Util.yesno(PONG_USE_DEFAULT_CONFIG)
+
+  if (useDefault) {
+    console.log('Using default configuration')
+  }
+
+  try {
+    const config = useDefault ? DEFAULT : await getDynamoConfig()
+    return config
+  } catch (error) {
+    console.error('Could not get configurations. Resorting to default.')
+    return DEFAULT
+  }
+}
+
+export default getConfig
