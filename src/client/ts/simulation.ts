@@ -109,11 +109,12 @@ export const tick = (app: State.IApp) => {
   })
 
   const input = Gamepad.sample()
+  const frame = app.game.frame
   const player = app.game.players[app.assignment]
 
   Game.handleInput(app.game, player, input)
 
-  const message: Message.IInput = {input}
+  const message: Message.IInput = { input, frame }
   app.socket.emit('input', message)
 }
 

@@ -30,7 +30,8 @@ export interface IStarting {
 }
 
 export interface IInput {
-  input: Game.IInput
+  input: Game.IInput,
+  frame: number,
 }
 
 export interface IGameOver {
