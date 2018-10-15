@@ -1,7 +1,7 @@
 import * as $ from 'jquery'
-import * as State from './state'
+import { IApp } from './interface'
 
-export const setup = (app: State.IApp) => {
+export const setup = (app: IApp) => {
   const player = app.game.players[app.assignment]
   const angle = player.baseAngle
 
@@ -10,7 +10,7 @@ export const setup = (app: State.IApp) => {
   createHud(app)
 }
 
-export const run = (app: State.IApp) => {
+export const run = (app: IApp) => {
   setInterval(() => {
     tick(app)
     // TODO: Decide how to incorporate configs in the client
@@ -18,7 +18,7 @@ export const run = (app: State.IApp) => {
   }, 144)
 }
 
-const tick = (app: State.IApp) => {
+const tick = (app: IApp) => {
   // TODO: Store this in the hud state?
   const health = document.getElementById('health')
   const value = app.game.players[app.assignment].health
@@ -26,7 +26,7 @@ const tick = (app: State.IApp) => {
   health.setAttribute('value', value.toString())
 }
 
-const createHud = (app: State.IApp) => {
+const createHud = (app: IApp) => {
   const hud = document.getElementById('hud')
   hud.style.display = 'initial'
 
@@ -37,7 +37,7 @@ const createHud = (app: State.IApp) => {
   health.setAttribute('value', value.toString())
 }
 
-export const destroy = (app: State.IApp) => {
+export const destroy = (app: IApp) => {
   $(app.render.canvas).remove()
   app.render = null
 

@@ -3,11 +3,10 @@ import * as io from 'socket.io-client'
 import * as Simulation from './simulation'
 import * as Render from './render'
 import * as Scene from './scene'
-import * as State from './state'
-import * as Game from '../../shared/game'
 import * as Message from '../../shared/message'
+import { IApp } from './interface'
 
-const globalApp: State.IApp = {
+const globalApp: IApp = {
   socket: null,
   server: null,
   name: null,
@@ -22,7 +21,7 @@ const globalApp: State.IApp = {
  * State Handlers
  */
 
-const connect = (app: State.IApp, name, host, port) => {
+const connect = (app: IApp, name, host, port) => {
   if (app.socket) { app.socket.disconnect() }
 
   app.server = {host, port}
@@ -32,7 +31,7 @@ const connect = (app: State.IApp, name, host, port) => {
   setup(app, app.socket)
 }
 
-const setup = (app: State.IApp, socket: SocketIOClient.Socket) => {
+const setup = (app: IApp, socket: SocketIOClient.Socket) => {
   socket.emit('join', name)
 
   socket.on('rejected', (message: Message.IReject) => {
@@ -81,11 +80,11 @@ const setup = (app: State.IApp, socket: SocketIOClient.Socket) => {
   })
 
   socket.on('gamestate', (message: Message.IGameState) => {
-    Simulation.sync(app, message.sample)
+    Simulation.sync(app, message)
   })
 }
 
-const reset = (app: State.IApp) => {
+const reset = (app: IApp) => {
   if (app.socket) { app.socket.disconnect() }
 
   if (app.game) {

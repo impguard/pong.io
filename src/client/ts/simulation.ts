@@ -1,9 +1,9 @@
 import * as _ from 'lodash'
 import * as Matter from 'matter-js'
-import * as State from './state'
 import * as Gamepad from './gamepad'
 import * as Game from '../../shared/game'
 import * as Message from '../../shared/message'
+import { IApp } from './interface'
 
 interface ISimulationOptions {
   element: HTMLElement,
@@ -11,7 +11,7 @@ interface ISimulationOptions {
   sample: Game.ISampleInitial,
 }
 
-export const setup = (app: State.IApp, options: ISimulationOptions) => {
+export const setup = (app: IApp, options: ISimulationOptions) => {
   app.game = Game.create(options.config)
 
   _.forEach(options.sample.players, (player, id)  => {
@@ -55,7 +55,14 @@ export const setup = (app: State.IApp, options: ISimulationOptions) => {
   app.render = render
 }
 
-export const sync = (app: State.IApp, sample: Game.ISample) => {
+export const sync = (app: IApp, message: Message.IGameState) => {
+  const { frame, sample } = message
+
+  // Need to do reconciliation!
+  // Basically roll back to when the sample
+  // Basically do the code I'm doing here where I "reset everything"
+  // Then play my saved inputs (which I need to save forward)
+
   _.forEach(sample.balls, (value, id) => {
     const position = Matter.Vector.create(value.x, value.y)
     const velocity = Matter.Vector.create(value.vx, value.vy)
@@ -102,7 +109,7 @@ const syncFlipper = (flipper: Game.IFlipper, sample: Game.ISampleFlipper) => {
   Matter.Body.setAngularVelocity(body, sample.va)
 }
 
-export const tick = (app: State.IApp) => {
+export const tick = (app: IApp) => {
   const { min, max } = app.game.config.ball.speed
   _.forEach(app.game.balls, (ball: Matter.Body) => {
     Game.clampBall(ball, min, max)
@@ -118,12 +125,12 @@ export const tick = (app: State.IApp) => {
   app.socket.emit('input', message)
 }
 
-export const run = (app: State.IApp) => {
+export const run = (app: IApp) => {
   Game.run(app.game, () => tick(app))
   Matter.Render.run(app.render)
 }
 
-export const destroy = (app: State.IApp) => {
+export const destroy = (app: IApp) => {
   Game.stop(app.game)
   Game.destroy(app.game)
   Matter.Render.stop(app.render)
