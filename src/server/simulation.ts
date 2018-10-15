@@ -5,9 +5,8 @@ import * as Util from './util'
 import * as Bot from './bot'
 import event from '../shared/event'
 import { IApp, Status } from './interface'
-import { IPlayer, IConfig } from '../shared/game'
 
-export const setup = (app: IApp, config: IConfig) => {
+export const setup = (app: IApp, config: Game.IConfig) => {
   app.game =  Game.create(config)
 
   // Spawn the balls into the game
@@ -124,14 +123,14 @@ export const tick = (app: IApp) => {
     Game.clampBall(ball, min, max)
   })
 
-  _.forEach(app.game.players, (player: IPlayer) => {
-    const { id } = player.composite
-    const shouldBotPlay = !player.assigned && app.status === Status.PLAYING
+  _.forEach(app.game.players, (player: Game.IPlayer) => {
+    const isBot = !player.assigned
+    const shouldBotPlay = app.status === Status.PLAYING
 
-    const input = app.inputs[id]
-      ? app.inputs[id]
-      : shouldBotPlay
-      ? Bot.think(app.game, player)
+    const input = isBot && shouldBotPlay
+      ? getBotPlayerInput(app, player)
+      : !isBot
+      ? getRealPlayerInput(app, player)
       : null
 
     if (!input) {
@@ -144,19 +143,12 @@ export const tick = (app: IApp) => {
       Game.handleInput(app.game, player, input)
     }
   })
-
-  app.inputs = {}
 }
 
 export const assign = (app: IApp): number => {
   const player = Game.assign(app.game)
   const id = player ? player.composite.id : null
   return id
-}
-
-export const handleInput = (app: IApp, id: number, input: Game.IInput) => {
-  const player = app.game.players[id]
-  Game.handleInput(app.game, player, input)
 }
 
 export const reset = (app: IApp) => {
@@ -193,6 +185,25 @@ export const run = (app: IApp) => {
 /****************************************
  * Gameplay Logic
  ****************************************/
+
+const getRealPlayerInput = (app: IApp, player: Game.IPlayer) => {
+  const { id } = player.composite
+  const { message } = app.players[id]
+
+  if (!message) {
+    return
+  }
+
+  const { input, frame } = message
+
+  app.players[id].latestFrame = frame
+  return input
+}
+
+const getBotPlayerInput = (app: IApp, player: Game.IPlayer) => {
+  const input = Bot.think(app.game, player)
+  return input
+}
 
 const handleBall = (app: IApp, ball: Matter.Body) => {
   const distance = Matter.Vector.magnitude(ball.position)

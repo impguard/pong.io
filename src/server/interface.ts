@@ -1,4 +1,5 @@
 import * as Game from '../shared/game'
+import * as Message from '../shared/message'
 
 export enum Status { READY, STARTING, PLAYING, STOPPING }
 
@@ -7,9 +8,13 @@ export interface IApp {
   server: SocketIO.Server,
   config: IAppConfig,
   game: Game.IState,
-  inputs: {
-    [id: number]: Game.IInput,
-  },
+  players: {
+    [id: number]: {
+      socket: SocketIO.Socket,
+      message: Message.IInput,
+      latestFrame: number,
+    },
+  }
 }
 
 export interface IAppConfig {

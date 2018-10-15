@@ -55,7 +55,7 @@ const create = async () => {
   const app: IApp = {
     status: Status.READY,
     config: null,
-    inputs: {},
+    players: {},
     game: null,
     server: io(httpServer),
   }
@@ -134,6 +134,12 @@ const add = (app: IApp, socket: SocketIO.Socket) => {
   socket.emit('accepted', acceptMessage)
   socket.join('players')
 
+  app.players[id] = {
+    socket,
+    message: null,
+    latestFrame: -1,
+  }
+
   console.log(`Accepted player. Assigned to ${id}`)
 
   socket.on('disconnect', () => {
@@ -146,7 +152,7 @@ const add = (app: IApp, socket: SocketIO.Socket) => {
   })
 
   socket.on('input', (message: Message.IInput) => {
-    app.inputs[id] = message.input
+    app.players[id].message = message
   })
 
   return true
@@ -209,10 +215,12 @@ httpServer.listen(80, async () => {
   Simulation.run(app)
 
   setInterval(() => {
-    const message: Message.IGameState = {
-      sample: Simulation.sample(app),
-    }
+    const sample = Simulation.sample(app)
 
-    app.server.to('players').emit('gamestate', message)
+    _.forEach(app.players, (player) => {
+      const { latestFrame: frame, socket } = player
+      const message: Message.IGameState = { sample, frame }
+      socket.emit('gamestate', message)
+    })
   }, app.config.network.delta)
 })
