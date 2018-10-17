@@ -58,11 +58,6 @@ export const setup = (app: IApp, options: ISimulationOptions) => {
 export const sync = (app: IApp, message: Message.IGameState) => {
   const { frame, sample } = message
 
-  // Need to do reconciliation!
-  // Basically roll back to when the sample
-  // Basically do the code I'm doing here where I "reset everything"
-  // Then play my saved inputs (which I need to save forward)
-
   _.forEach(sample.balls, (value, id) => {
     const position = Matter.Vector.create(value.x, value.y)
     const velocity = Matter.Vector.create(value.vx, value.vy)
@@ -95,6 +90,16 @@ export const sync = (app: IApp, message: Message.IGameState) => {
       angle: value.a,
     })
   })
+
+  let curr = frame
+  while (curr < app.game.frame) {
+    const input = app.inputs.get(curr)
+
+    update(app, input)
+    Game.update(app.game)
+
+    curr += 1
+  }
 }
 
 const syncFlipper = (flipper: Game.IFlipper, sample: Game.ISampleFlipper) => {
@@ -110,19 +115,26 @@ const syncFlipper = (flipper: Game.IFlipper, sample: Game.ISampleFlipper) => {
 }
 
 export const tick = (app: IApp) => {
+  const input = Gamepad.sample()
+  const frame = app.game.frame
+
+  const message: Message.IInput = { input, frame }
+
+  update(app, input)
+
+  app.inputs.set(frame, input)
+  app.socket.emit('input', message)
+}
+
+export const update = (app: IApp, input: Game.IInput) => {
+  const player = app.game.players[app.assignment]
+
   const { min, max } = app.game.config.ball.speed
   _.forEach(app.game.balls, (ball: Matter.Body) => {
     Game.clampBall(ball, min, max)
   })
 
-  const input = Gamepad.sample()
-  const frame = app.game.frame
-  const player = app.game.players[app.assignment]
-
   Game.handleInput(app.game, player, input)
-
-  const message: Message.IInput = { input, frame }
-  app.socket.emit('input', message)
 }
 
 export const run = (app: IApp) => {

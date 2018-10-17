@@ -1,9 +1,10 @@
 import * as $ from 'jquery'
 import * as io from 'socket.io-client'
+import * as Message from '../../shared/message'
 import * as Simulation from './simulation'
 import * as Render from './render'
 import * as Scene from './scene'
-import * as Message from '../../shared/message'
+import CBuffer from './cbuffer'
 import { IApp } from './interface'
 
 const globalApp: IApp = {
@@ -13,6 +14,7 @@ const globalApp: IApp = {
   started: false,
   accepted: false,
   assignment: null,
+  inputs: new CBuffer(256),
   game: null,
   render: null,
 }
