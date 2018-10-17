@@ -220,7 +220,7 @@ httpServer.listen(80, async () => {
     _.forEach(app.players, (player) => {
       const { latestFrame: frame, socket } = player
       const message: Message.IGameState = { sample, frame }
-      socket.emit('gamestate', message)
+      socket.volatile.emit('gamestate', message)
     })
   }, app.config.network.delta)
 })
