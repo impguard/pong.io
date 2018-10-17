@@ -3,15 +3,14 @@ import * as io from 'socket.io-client'
 import * as Message from '../../shared/message'
 import * as Simulation from './simulation'
 import * as Render from './render'
-import * as Scene from './scene'
 import CBuffer from './cbuffer'
-import { IApp } from './interface'
+import { IApp, SceneName } from './interface'
 
 const globalApp: IApp = {
   socket: null,
   server: null,
+  scene: null,
   name: null,
-  started: false,
   accepted: false,
   assignment: null,
   inputs: new CBuffer(256),
@@ -63,7 +62,7 @@ const setup = (app: IApp, socket: SocketIOClient.Socket) => {
   socket.on('gameover', (message: Message.IGameOver) => {
     const { winner } = message
     alert(`Winner is player ${winner}!`)
-    Scene.change(Scene.Name.Home)
+    changeScene(app, SceneName.Home)
   })
 
   socket.on('accepted', (message: Message.IAccept) => {
@@ -80,12 +79,18 @@ const setup = (app: IApp, socket: SocketIOClient.Socket) => {
     Render.setup(app)
     Render.run(app)
 
-    Scene.change(Scene.Name.Game)
+    changeScene(app, SceneName.Game)
   })
 
   socket.on('gamestate', (message: Message.IGameState) => {
     Simulation.sync(app, message)
   })
+}
+
+const changeScene = (app: IApp, name: SceneName) => {
+  app.scene.hide()
+  app.scene = $(name)
+  app.scene.show()
 }
 
 const reset = (app: IApp) => {
@@ -97,7 +102,7 @@ const reset = (app: IApp) => {
   }
 
   app.accepted = false
-  Scene.change(Scene.Name.Home)
+  changeScene(app, SceneName.Home)
 }
 
 /**
@@ -124,6 +129,12 @@ const load = () => {
 }
 
 $('document').ready(() => {
+  // User events
   $('#play').click(play)
+
+  // Initial load
   load()
+
+  // Setup app
+  globalApp.scene = $(SceneName.Home)
 })

@@ -58,6 +58,7 @@ export const setup = (app: IApp, options: ISimulationOptions) => {
 export const sync = (app: IApp, message: Message.IGameState) => {
   const { frame, sample } = message
 
+  // Sync balls
   _.forEach(sample.balls, (value, id) => {
     const position = Matter.Vector.create(value.x, value.y)
     const velocity = Matter.Vector.create(value.vx, value.vy)
@@ -70,6 +71,7 @@ export const sync = (app: IApp, message: Message.IGameState) => {
     Matter.Body.setVelocity(ball, velocity)
   })
 
+  // Sync Players
   _.forEach(sample.players, (value, id) => {
     const player: Game.IPlayer = app.game.players[id]
 
@@ -82,6 +84,7 @@ export const sync = (app: IApp, message: Message.IGameState) => {
     syncFlipper(player.rflipper, value.rf)
   })
 
+  // Generate goal covers
   _.forEach(sample.covers, (value, id) => {
     if (app.game.covers[id]) { return }
 
@@ -91,14 +94,13 @@ export const sync = (app: IApp, message: Message.IGameState) => {
     })
   })
 
-  let curr = frame
-  while (curr < app.game.frame) {
-    const input = app.inputs.get(curr)
+  // Perform reconciliation
+  const delta = app.game.frame - frame
+  console.log(`Reconciliation delta: ${delta}`)
 
+  for (const input of app.inputs.range(frame, app.game.frame)) {
     update(app, input)
     Game.update(app.game)
-
-    curr += 1
   }
 }
 

@@ -137,7 +137,7 @@ const add = (app: IApp, socket: SocketIO.Socket) => {
   app.players[id] = {
     socket,
     message: null,
-    latestFrame: -1,
+    latestFrame: 0,
   }
 
   console.log(`Accepted player. Assigned to ${id}`)
