@@ -24,6 +24,8 @@ const globalApp: IApp = {
 const connect = (app: IApp, name, host, port) => {
   if (app.socket) { app.socket.disconnect() }
 
+  localStorage.setItem('connectionInfo', JSON.stringify({ host, port }))
+
   app.server = {host, port}
   app.name = name
   app.socket = io(`${host}:${port}`)
@@ -97,13 +99,29 @@ const reset = (app: IApp) => {
 }
 
 /**
- * User Events
+ * Entrypoint
  */
 
-$('#play').click(() =>  {
+const play = () => {
   const name = $('#name').val()
   const host = $('#host').val()
   const port = $('#port').val()
 
   connect(globalApp, name, host, port)
+}
+
+const load = () => {
+  const connectionInfo = localStorage.getItem('connectionInfo')
+
+  const { host, port } = connectionInfo
+    ? JSON.parse(connectionInfo)
+    : { host: 'localhost', port: 7777 }
+
+  $('#host').val(host)
+  $('#port').val(port)
+}
+
+$('document').ready(() => {
+  $('#play').click(play)
+  load()
 })
