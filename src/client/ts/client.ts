@@ -14,6 +14,7 @@ const globalApp: IApp = {
   accepted: false,
   assignment: null,
   inputs: new CBuffer(256),
+  latestFrame: 0,
   game: null,
   render: null,
 }
@@ -83,6 +84,11 @@ const setup = (app: IApp, socket: SocketIOClient.Socket) => {
   })
 
   socket.on('gamestate', (message: Message.IGameState) => {
+    if (message.frame < app.latestFrame) {
+      return
+    }
+
+    app.latestFrame = message.frame
     Simulation.sync(app, message)
   })
 }

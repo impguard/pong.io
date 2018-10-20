@@ -125,6 +125,7 @@ export const tick = (app: IApp) => {
   update(app, input)
 
   app.inputs.set(frame, input)
+
   app.socket.emit('input', message)
 }
 

@@ -19,6 +19,7 @@ export interface IApp {
 
   assignment: number,
   inputs: CBuffer<Game.IInput>,
+  latestFrame: number,
   game: Game.IState,
   render: Matter.Render,
 }
