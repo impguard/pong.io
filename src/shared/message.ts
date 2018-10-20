@@ -3,18 +3,18 @@ import * as Game from './game'
 export enum ErrorCode { MATCHFULL, MATCHSTARTED }
 
 export interface IAccept {
-  id: number
-  config: Game.IConfig
-  sample: Game.ISampleInitial
+  id: number,
+  config: Game.IConfig,
+  sample: Game.ISampleInitial,
 }
 
 export interface IReject {
-  code: ErrorCode
+  code: ErrorCode,
 }
 
 export interface IGoal {
-  id: number
-  health: number
+  id: number,
+  health: number,
 }
 
 export interface IDeath {
@@ -22,7 +22,8 @@ export interface IDeath {
 }
 
 export interface IGameState {
-  sample: Game.ISample
+  sample: Game.ISample,
+  frame: number,
 }
 
 export interface IStarting {
@@ -30,9 +31,10 @@ export interface IStarting {
 }
 
 export interface IInput {
-  input: Game.IInput
+  input: Game.IInput,
+  frame: number,
 }
 
 export interface IGameOver {
-  winner: number
+  winner: number,
 }

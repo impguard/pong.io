@@ -24,6 +24,7 @@ export const create = (config: IConfig): IState => {
   return {
     config,
     engine,
+    frame: 0,
     balls: {},
     players: {},
     paddles: {},
@@ -37,8 +38,8 @@ export const create = (config: IConfig): IState => {
 export const run = (state: IState, tick: () => void) =>  {
   state.runner.id = setInterval(() => {
     tick()
-
-    Matter.Engine.update(state.engine, state.config.delta)
+    update(state)
+    state.frame += 1
   }, state.config.delta)
 }
 
@@ -53,6 +54,10 @@ export const destroy = (state: IState) => {
 /****************************************
  * Game Logic Helpers
  ****************************************/
+
+export const update = (state: IState) => {
+  Matter.Engine.update(state.engine, state.config.delta)
+}
 
 export const assign = (state: IState) => {
   const player = _.find(state.players, (p) => !p.assigned)

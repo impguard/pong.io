@@ -1,19 +1,19 @@
 import * as $ from 'jquery'
 import * as io from 'socket.io-client'
+import * as Message from '../../shared/message'
 import * as Simulation from './simulation'
 import * as Render from './render'
-import * as Scene from './scene'
-import * as State from './state'
-import * as Game from '../../shared/game'
-import * as Message from '../../shared/message'
+import CBuffer from './cbuffer'
+import { IApp, SceneName } from './interface'
 
-const globalApp: State.IApp = {
+const globalApp: IApp = {
   socket: null,
   server: null,
+  scene: null,
   name: null,
-  started: false,
   accepted: false,
   assignment: null,
+  inputs: new CBuffer(256),
   game: null,
   render: null,
 }
@@ -22,8 +22,10 @@ const globalApp: State.IApp = {
  * State Handlers
  */
 
-const connect = (app: State.IApp, name, host, port) => {
+const connect = (app: IApp, name, host, port) => {
   if (app.socket) { app.socket.disconnect() }
+
+  localStorage.setItem('connectionInfo', JSON.stringify({ host, port }))
 
   app.server = {host, port}
   app.name = name
@@ -32,7 +34,7 @@ const connect = (app: State.IApp, name, host, port) => {
   setup(app, app.socket)
 }
 
-const setup = (app: State.IApp, socket: SocketIOClient.Socket) => {
+const setup = (app: IApp, socket: SocketIOClient.Socket) => {
   socket.emit('join', name)
 
   socket.on('rejected', (message: Message.IReject) => {
@@ -60,7 +62,7 @@ const setup = (app: State.IApp, socket: SocketIOClient.Socket) => {
   socket.on('gameover', (message: Message.IGameOver) => {
     const { winner } = message
     alert(`Winner is player ${winner}!`)
-    Scene.change(Scene.Name.Home)
+    changeScene(app, SceneName.Home)
   })
 
   socket.on('accepted', (message: Message.IAccept) => {
@@ -77,15 +79,21 @@ const setup = (app: State.IApp, socket: SocketIOClient.Socket) => {
     Render.setup(app)
     Render.run(app)
 
-    Scene.change(Scene.Name.Game)
+    changeScene(app, SceneName.Game)
   })
 
   socket.on('gamestate', (message: Message.IGameState) => {
-    Simulation.sync(app, message.sample)
+    Simulation.sync(app, message)
   })
 }
 
-const reset = (app: State.IApp) => {
+const changeScene = (app: IApp, name: SceneName) => {
+  app.scene.hide()
+  app.scene = $(name)
+  app.scene.show()
+}
+
+const reset = (app: IApp) => {
   if (app.socket) { app.socket.disconnect() }
 
   if (app.game) {
@@ -94,17 +102,39 @@ const reset = (app: State.IApp) => {
   }
 
   app.accepted = false
-  Scene.change(Scene.Name.Home)
+  changeScene(app, SceneName.Home)
 }
 
 /**
- * User Events
+ * Entrypoint
  */
 
-$('#play').click(() =>  {
+const play = () => {
   const name = $('#name').val()
   const host = $('#host').val()
   const port = $('#port').val()
 
   connect(globalApp, name, host, port)
+}
+
+const load = () => {
+  const connectionInfo = localStorage.getItem('connectionInfo')
+
+  const { host, port } = connectionInfo
+    ? JSON.parse(connectionInfo)
+    : { host: 'localhost', port: 7777 }
+
+  $('#host').val(host)
+  $('#port').val(port)
+}
+
+$('document').ready(() => {
+  // User events
+  $('#play').click(play)
+
+  // Initial load
+  load()
+
+  // Setup app
+  globalApp.scene = $(SceneName.Home)
 })

@@ -29,6 +29,7 @@ export interface IFlipper {
 export interface IState {
   engine: Matter.Engine,
   config: IConfig,
+  frame: number,
   runner: {
     id?: any,
   },

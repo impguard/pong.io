@@ -1,9 +1,9 @@
 import * as _ from 'lodash'
 import * as Matter from 'matter-js'
-import * as State from './state'
 import * as Gamepad from './gamepad'
 import * as Game from '../../shared/game'
 import * as Message from '../../shared/message'
+import { IApp } from './interface'
 
 interface ISimulationOptions {
   element: HTMLElement,
@@ -11,7 +11,7 @@ interface ISimulationOptions {
   sample: Game.ISampleInitial,
 }
 
-export const setup = (app: State.IApp, options: ISimulationOptions) => {
+export const setup = (app: IApp, options: ISimulationOptions) => {
   app.game = Game.create(options.config)
 
   _.forEach(options.sample.players, (player, id)  => {
@@ -55,7 +55,10 @@ export const setup = (app: State.IApp, options: ISimulationOptions) => {
   app.render = render
 }
 
-export const sync = (app: State.IApp, sample: Game.ISample) => {
+export const sync = (app: IApp, message: Message.IGameState) => {
+  const { frame, sample } = message
+
+  // Sync balls
   _.forEach(sample.balls, (value, id) => {
     const position = Matter.Vector.create(value.x, value.y)
     const velocity = Matter.Vector.create(value.vx, value.vy)
@@ -68,6 +71,7 @@ export const sync = (app: State.IApp, sample: Game.ISample) => {
     Matter.Body.setVelocity(ball, velocity)
   })
 
+  // Sync Players
   _.forEach(sample.players, (value, id) => {
     const player: Game.IPlayer = app.game.players[id]
 
@@ -80,6 +84,7 @@ export const sync = (app: State.IApp, sample: Game.ISample) => {
     syncFlipper(player.rflipper, value.rf)
   })
 
+  // Generate goal covers
   _.forEach(sample.covers, (value, id) => {
     if (app.game.covers[id]) { return }
 
@@ -88,6 +93,15 @@ export const sync = (app: State.IApp, sample: Game.ISample) => {
       angle: value.a,
     })
   })
+
+  // Perform reconciliation
+  const delta = app.game.frame - frame
+  console.log(`Reconciliation delta: ${delta}`)
+
+  for (const input of app.inputs.range(frame, app.game.frame)) {
+    update(app, input)
+    Game.update(app.game)
+  }
 }
 
 const syncFlipper = (flipper: Game.IFlipper, sample: Game.ISampleFlipper) => {
@@ -102,27 +116,35 @@ const syncFlipper = (flipper: Game.IFlipper, sample: Game.ISampleFlipper) => {
   Matter.Body.setAngularVelocity(body, sample.va)
 }
 
-export const tick = (app: State.IApp) => {
+export const tick = (app: IApp) => {
+  const input = Gamepad.sample()
+  const frame = app.game.frame
+
+  const message: Message.IInput = { input, frame }
+
+  update(app, input)
+
+  app.inputs.set(frame, input)
+  app.socket.emit('input', message)
+}
+
+export const update = (app: IApp, input: Game.IInput) => {
+  const player = app.game.players[app.assignment]
+
   const { min, max } = app.game.config.ball.speed
   _.forEach(app.game.balls, (ball: Matter.Body) => {
     Game.clampBall(ball, min, max)
   })
 
-  const input = Gamepad.sample()
-  const player = app.game.players[app.assignment]
-
   Game.handleInput(app.game, player, input)
-
-  const message: Message.IInput = {input}
-  app.socket.emit('input', message)
 }
 
-export const run = (app: State.IApp) => {
+export const run = (app: IApp) => {
   Game.run(app.game, () => tick(app))
   Matter.Render.run(app.render)
 }
 
-export const destroy = (app: State.IApp) => {
+export const destroy = (app: IApp) => {
   Game.stop(app.game)
   Game.destroy(app.game)
   Matter.Render.stop(app.render)
