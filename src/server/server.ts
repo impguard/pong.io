@@ -218,7 +218,8 @@ httpServer.listen(80, async () => {
     const sample = Simulation.sample(app)
 
     _.forEach(app.players, (player) => {
-      const { latestFrame: frame, socket } = player
+      const { latestFrame, socket } = player
+      const frame = latestFrame + 1
       const message: Message.IGameState = { sample, frame }
       socket.volatile.emit('gamestate', message)
     })
