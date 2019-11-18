@@ -22,7 +22,11 @@
   },
   "homepage": "https://github.com/impguard/pong.io#readme",
   "dependencies": {
+    "copy-webpack-plugin": "^5.0.5",
+    "lodash": "^4.17.15",
     "planck-js": "^0.3.10",
-    "typescript": "^3.7.2"
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.7.2",
+    "webpack": "^4.41.2"
   }
 }
