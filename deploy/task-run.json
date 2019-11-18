@@ -1,7 +1,0 @@
-{
-    "cluster": "pong-sandbox",
-    "taskDefinition": "",
-    "count": 1,
-    "startedBy": "bake",
-    "launchType": "EC2"
-}
