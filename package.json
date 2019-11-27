@@ -4,7 +4,11 @@
   "description": "A multiplayer pong game",
   "main": "index.js",
   "scripts": {
-    "build:server": "tsc --project ./src/server"
+    "build:server": "tsc --project ./src/server",
+    "build:client": "webpack --config src/client/webpack.config.js",
+    "server": "tsnd --respawn --project ./src/server/tsconfig.json ./src/server/main.ts",
+    "client": "webpack-dev-server --config src/client/webpack.config.js",
+    "start": "concurrently --kill-others -c 'cyan,magenta' 'npm:server' 'npm:client'"
   },
   "repository": {
     "type": "git",
@@ -22,11 +26,23 @@
   },
   "homepage": "https://github.com/impguard/pong.io#readme",
   "dependencies": {
+    "@types/lodash": "^4.14.149",
+    "@types/socket.io": "^2.1.4",
+    "@types/socket.io-client": "^1.4.32",
+    "@types/ws": "^6.0.3",
+    "concurrently": "^5.0.0",
     "copy-webpack-plugin": "^5.0.5",
     "lodash": "^4.17.15",
     "planck-js": "^0.3.10",
+    "socket.io": "^2.3.0",
+    "socket.io-client": "^2.3.0",
     "ts-loader": "^6.2.1",
+    "ts-node-dev": "^1.0.0-pre.44",
     "typescript": "^3.7.2",
-    "webpack": "^4.41.2"
+    "webpack": "^4.41.2",
+    "webpack-dev-server": "^3.9.0"
+  },
+  "devDependencies": {
+    "webpack-cli": "^3.3.10"
   }
 }
