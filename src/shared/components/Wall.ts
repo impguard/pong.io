@@ -1,5 +1,8 @@
 import * as planck from "planck-js"
 
+import * as state from "../state"
+import Component from "./Component"
+
 export interface WallDef {
   id: number,
   position: planck.Vec2,
@@ -8,10 +11,14 @@ export interface WallDef {
   angle: number,
 }
 
-export default class Wall {
+export default class Wall extends Component {
+  readonly def: WallDef
+  readonly body: planck.Body
 
   constructor(world: planck.World, def: WallDef) {
-    this.world = world;
+    super()
+    this.def = def
+    this.world = world
 
     this.body = world.createBody({
       userData: {
@@ -22,16 +29,20 @@ export default class Wall {
       angle: def.angle,
     })
 
-    this.fixture = this.body.createFixture({
-      shape: planck.Box(def.width, def.height)
+    this.body.createFixture({
+      shape: planck.Box(def.width / 2, def.height / 2),
+      isSensor: true,
     })
   }
 
-  get id(): number {
-    return (this.body.getUserData() as any).id
+  sync(state: state.Paddle): void {
+    this.body.setPosition(planck.Vec2(state.x, state.y))
+    this.body.setAngle(state.angle)
   }
 
-  private fixture: planck.Fixture
-  private body: planck.Body
-  private world: planck.World
+  snapshot(): void {
+    throw new Error("Cannot snapshot wall state");
+  }
+
+  private readonly world: planck.World
 }

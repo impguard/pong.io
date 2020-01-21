@@ -1,52 +1,54 @@
 import * as planck from "planck-js"
 
-import * as state from "../state"
 import Component from "./Component"
+import * as state from "../state"
 
-interface PaddleDef {
+interface BallDef {
   id: number,
   position: planck.Vec2,
-  width: number,
-  height: number,
-  angle: number,
+  velocity: planck.Vec2,
+  radius: number,
 }
 
 export default class Paddle extends Component {
-  readonly def: PaddleDef
+  readonly def: BallDef
   readonly body: planck.Body
 
-  constructor(world: planck.World, def: PaddleDef) {
+  constructor(world: planck.World, def: BallDef) {
     super()
     this.world = world
     this.def = def
 
     this.body = world.createBody({
-      type: "kinematic",
+      type: "dynamic",
       position: def.position,
-      angle: def.angle,
+      angle: 0,
+      fixedRotation: true,
     })
 
     this.body.createFixture({
-      shape: planck.Box(def.width / 2, def.height / 2)
+      shape: planck.Circle(def.radius)
     })
+
+    this.body.setLinearVelocity(def.velocity)
   }
 
-  sync(state: state.Paddle): void {
+  sync(state: state.Ball): void {
     this.body.setPosition(planck.Vec2(state.x, state.y))
-    this.body.setAngle(state.angle)
+    this.body.setLinearVelocity(planck.Vec2(state.vx, state.vy))
   }
 
-  snapshot(): state.Paddle {
+  snapshot(): state.Ball {
     const position = this.body.getPosition()
-    const angle = this.body.getAngle()
+    const velocity = this.body.getLinearVelocity()
 
     return {
       id: this.def.id,
       x: position.x,
       y: position.y,
-      width: this.def.width,
-      height: this.def.height,
-      angle: angle,
+      vx: velocity.x,
+      vy: velocity.y,
+      radius: this.def.radius,
     }
   }
 

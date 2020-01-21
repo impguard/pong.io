@@ -12,7 +12,11 @@
       const canvas = document.getElementById("game")
       const context = canvas.getContext("2d")
 
-      window.pong.setup(context)
+      window.pong.setup({
+        context,
+        width: 800,
+        height: 800,
+      })
     </script>
   </body>
 </html>

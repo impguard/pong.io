@@ -3,6 +3,7 @@ import * as planck from "planck-js"
 import Paddle from "./components/Paddle"
 import Wall from "./components/Wall"
 import Base from "./components/Base"
+import Ball from "./components/Ball"
 import * as state from "./state"
 
 
@@ -11,12 +12,13 @@ export default class Game {
   readonly actors: Actors
 
   constructor(state: state.Game) {
-    this.world = planck.World()
+    this.world = planck.World(planck.Vec2.zero())
 
     this.actors = {
       paddles: {},
       bases: {},
       walls: {},
+      balls: {},
     }
 
     state.paddles.forEach(paddleState => {
@@ -44,7 +46,7 @@ export default class Game {
         angle,
       })
 
-      this.actors.bases[base.id] = base
+      this.actors.bases[base.def.id] = base
     })
 
     state.walls.forEach(wallState => {
@@ -58,7 +60,20 @@ export default class Game {
         angle,
       })
 
-      this.actors.walls[wall.id] = wall
+      this.actors.walls[wall.def.id] = wall
+    })
+
+    state.balls.forEach(ballState => {
+      const { id, x, y, vx, vy, radius } = ballState
+
+      const ball = new Ball(this.world, {
+        id,
+        position: planck.Vec2(x, y),
+        velocity: planck.Vec2(vx, vy),
+        radius,
+      })
+
+      this.actors.balls[ball.def.id] = ball
     })
   }
 
@@ -76,5 +91,8 @@ interface Actors {
   }
   bases: {
     [id: number]: Base
+  }
+  balls: {
+    [id: number]: Ball
   }
 }

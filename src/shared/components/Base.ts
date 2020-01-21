@@ -1,5 +1,8 @@
 import * as planck from "planck-js"
 
+import * as state from "../state"
+import Component from "./Component"
+
 interface BaseDef {
   id: number,
   position: planck.Vec2,
@@ -8,10 +11,14 @@ interface BaseDef {
   angle: number,
 }
 
-export default class Base {
+export default class Base extends Component {
+  readonly def: BaseDef
+  readonly body: planck.Body
 
   constructor(world: planck.World, def: BaseDef) {
-    this.world = world;
+    super()
+    this.world = world
+    this.def = def
 
     this.body = world.createBody({
       userData: {
@@ -22,17 +29,20 @@ export default class Base {
       angle: def.angle,
     })
 
-    this.fixture = this.body.createFixture({
-      shape: planck.Box(def.width, def.height),
+    this.body.createFixture({
+      shape: planck.Box(def.width / 2, def.height / 2),
       isSensor: true,
     })
   }
 
-  get id(): number {
-    return (this.body.getUserData() as any).id
+  sync(state: state.Base): void {
+    this.body.setPosition(planck.Vec2(state.x, state.y))
+    this.body.setAngle(state.angle)
   }
 
-  private fixture: planck.Fixture
-  private body: planck.Body
-  private world: planck.World
+  snapshot() {
+    throw new Error("Cannot snapshot base state");
+  }
+
+  private readonly world: planck.World
 }

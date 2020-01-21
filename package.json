@@ -6,9 +6,9 @@
   "scripts": {
     "build:server": "tsc --project ./src/server",
     "build:client": "webpack --config src/client/webpack.config.js",
-    "server": "tsnd --respawn --project ./src/server/tsconfig.json ./src/server/main.ts",
+    "server": "tsnd --respawn --watch ./src/shared/ --project ./src/server/tsconfig.json ./src/server/main.ts",
     "client": "webpack-dev-server --config src/client/webpack.config.js",
-    "start": "concurrently --kill-others -c 'cyan,magenta' 'npm:server' 'npm:client'"
+    "start": "concurrently --handle-input --kill-others -c 'cyan,magenta' 'npm:server' 'npm:client'"
   },
   "repository": {
     "type": "git",

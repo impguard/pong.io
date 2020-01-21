@@ -12,15 +12,16 @@ interface Message<Data, Buffer> {
 
 export interface InitData {
   gameState: state.Game
+  config: state.Config
 }
 
-export const Init: Message<InitData, state.Game> = {
+export const Init: Message<InitData, InitData> = {
   name: "init",
   marshal: data => {
-    return data.gameState
+    return data
   },
-  unmarshal: gameState => {
-    return { gameState }
+  unmarshal: data => {
+    return data
   }
 }
 
